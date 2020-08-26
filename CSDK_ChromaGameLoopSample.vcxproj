@@ -150,6 +150,12 @@
     <None Include="CChromaEditorLibrary64.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="Animations\Rainbow_Keyboard.chroma">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="Animations\Spiral_Keyboard.chroma">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Razer\ChromaAnimationAPI.h" />

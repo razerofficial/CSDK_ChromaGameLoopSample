@@ -28,6 +28,8 @@
   <ItemGroup>
     <None Include="CChromaEditorLibrary64.dll" />
     <None Include="CChromaEditorLibrary.dll" />
+    <None Include="Animations\Rainbow_Keyboard.chroma" />
+    <None Include="Animations\Spiral_Keyboard.chroma" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Razer\ChromaAnimationAPI.h">

@@ -15,8 +15,12 @@ using namespace std;
 // This animation will be in immediate mode to avoid any caching
 // Any color changes will immediately display in the next frame update.
 const char* ANIMATION_FINAL = "Dynamic\\Final_Keyboard.chroma";
+const char* ANIMATION_RAINBOW = "Animations\\Rainbow_Keyboard.chroma";
+const char* ANIMATION_SPIRAL = "Animations\\Spiral_Keyboard.chroma";
 
 static bool _sWaitForExit = true;
+static int _sFrameRainbow = -1;
+static int _sFrameSpiral = -1;
 
 // Function prototypes
 void Cleanup();
@@ -74,7 +78,7 @@ void SetKeyColor(int* colors, int rzkey, int color)
 
 void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue)
 {
-	SetKeyColor(colors, rzkey, ChromaAnimationAPI::GetRGB(255, 255, 0));
+	SetKeyColor(colors, rzkey, ChromaAnimationAPI::GetRGB(red, green, blue));
 }
 
 void GameLoop()
@@ -83,11 +87,66 @@ void GameLoop()
 	int maxColumns = ChromaAnimationAPI::GetMaxColumn((int)EChromaSDKDevice2DEnum::DE_Keyboard);
 	int size = maxRow * maxColumns;
 	int* colors = new int[size];
+	int* tempColors = new int[size];
 	int animationId = ChromaAnimationAPI::GetAnimation(ANIMATION_FINAL);
+
+	int animationSpiral = ChromaAnimationAPI::GetAnimation(ANIMATION_SPIRAL);
+	int animationRainbow = ChromaAnimationAPI::GetAnimation(ANIMATION_RAINBOW);
+
 	while (_sWaitForExit)
 	{
 		memset(colors, 0, sizeof(int) * size);
+
+		if (_sFrameRainbow >= 0)
+		{
+			if (_sFrameRainbow < ChromaAnimationAPI::GetFrameCountName(ANIMATION_RAINBOW))
+			{
+				ChromaAnimationAPI::SetCurrentFrame(animationRainbow, _sFrameRainbow);
+				cout << "Rainbow: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_RAINBOW)) << " of " << ChromaAnimationAPI::GetFrameCountName(ANIMATION_RAINBOW) << endl;;
+				float duration;
+				ChromaAnimationAPI::GetFrame(animationRainbow, _sFrameRainbow, &duration, tempColors, size);
+				memcpy(colors, tempColors, sizeof(int) * size);
+				++_sFrameRainbow;
+			}
+			else
+			{
+				_sFrameRainbow = -1;
+			}
+		}
+
+		if (_sFrameSpiral >= 0)
+		{
+			if (_sFrameSpiral < ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL))
+			{
+				ChromaAnimationAPI::SetCurrentFrame(animationSpiral, _sFrameSpiral);
+				cout << "Spiral: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_SPIRAL)) << " of " << ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL) << endl;;
+				float duration;
+				ChromaAnimationAPI::GetFrame(animationSpiral, _sFrameSpiral, &duration, tempColors, size);
+				memcpy(colors, tempColors, sizeof(int) * size);
+				++_sFrameSpiral;
+			}
+			else
+			{
+				_sFrameSpiral = -1;
+			}
+		}
+
+		// Set hotkeys
 		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
+		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
+		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
+		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
+		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
+
+		if (_sFrameRainbow >= 0)
+		{
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
+		}
+
+		if (_sFrameSpiral >= 0)
+		{
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+		}
 
 		ChromaAnimationAPI::UpdateFrame(animationId, 0, 0.033f, colors, size);
 
@@ -97,6 +156,7 @@ void GameLoop()
 		Sleep(33); //30 FPS
 	}
 	delete[] colors;
+	delete[] tempColors;
 }
 
 void HandleInput()
@@ -108,6 +168,16 @@ void HandleInput()
 		{
 		case 27:
 			_sWaitForExit = false;
+			break;
+		case 'r':
+		case 'R':
+			_sFrameRainbow = 0; //start
+			_sFrameSpiral = -1; //disable
+			break;
+		case 's':
+		case 'S':
+			_sFrameSpiral = 0; //start
+			_sFrameRainbow = -1; //disable
 			break;
 		}
 		Sleep(0);
@@ -131,7 +201,9 @@ int main()
 	Init();
 	SetupAnimations();
 	thread thread(GameLoop);
-	cout << "Press ESC to Quit." << endl;
+	cout << "Press `ESC` to Quit." << endl;
+	cout << "Press `R` for rainbow." << endl;
+	cout << "Press `S` for spiral." << endl;
 	HandleInput();
 	thread.join();
 	Cleanup();

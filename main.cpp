@@ -2,13 +2,18 @@
 //
 
 #include "Razer\ChromaAnimationAPI.h"
+#include <array>
+#include <chrono>
 #include <conio.h>
 #include <iostream>
 #include <string>
+#include <time.h>
 #include <thread>
 
 using namespace ChromaSDK;
 using namespace std;
+
+const float MATH_PI = 3.14159f;
 
 // This final animation will have a single frame
 // This animation will have looping on
@@ -81,6 +86,18 @@ void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue)
 	SetKeyColor(colors, rzkey, ChromaAnimationAPI::GetRGB(red, green, blue));
 }
 
+//ref: https://stackoverflow.com/questions/10905892/equivalent-of-gettimeday-for-windows
+int gettimeofday(struct timeval* tp, struct timezone* tzp) {
+	namespace sc = std::chrono;
+	sc::system_clock::duration d = sc::system_clock::now().time_since_epoch();
+	sc::seconds s = sc::duration_cast<sc::seconds>(d);
+	tp->tv_sec = (long)s.count();
+	tp->tv_usec = (long)sc::duration_cast<sc::microseconds>(d - s).count();
+
+	return 0;
+}
+
+
 void GameLoop()
 {
 	int maxRow = ChromaAnimationAPI::GetMaxRow((int)EChromaSDKDevice2DEnum::DE_Keyboard);
@@ -95,8 +112,15 @@ void GameLoop()
 
 	while (_sWaitForExit)
 	{
+		// get time
+		struct timeval tp;
+		gettimeofday(&tp, NULL);
+		long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+
+		// start with a blank frame
 		memset(colors, 0, sizeof(int) * size);
 
+		// add rainbow colors
 		if (_sFrameRainbow >= 0)
 		{
 			if (_sFrameRainbow < ChromaAnimationAPI::GetFrameCountName(ANIMATION_RAINBOW))
@@ -114,6 +138,7 @@ void GameLoop()
 			}
 		}
 
+		// add or blend spiral
 		if (_sFrameSpiral >= 0)
 		{
 			if (_sFrameSpiral < ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL))
@@ -123,7 +148,7 @@ void GameLoop()
 				cout << "Spiral: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_SPIRAL)) << " of " << frameCount << endl;;
 				float duration;
 				ChromaAnimationAPI::GetFrame(animationSpiral, _sFrameSpiral, &duration, tempColors, size);
-				for (int i = 0; i < frameCount; ++i)
+				for (int i = 0; i < size; ++i)
 				{
 					if (tempColors[i] != 0)
 					{
@@ -138,21 +163,79 @@ void GameLoop()
 			}
 		}
 
-		// Set hotkeys
+		// Show hotkeys
 		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
 		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
 		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
 		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
 		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
 
+		// Highlight R if rainbow is active
 		if (_sFrameRainbow >= 0)
 		{
 			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
 		}
 
+		// Highlight S if spiral is active
 		if (_sFrameSpiral >= 0)
 		{
 			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+		}
+
+		// SHow health animation
+		{
+			int keys[] = {
+				Keyboard::RZKEY::RZKEY_F1,
+				Keyboard::RZKEY::RZKEY_F2,
+				Keyboard::RZKEY::RZKEY_F3,
+				Keyboard::RZKEY::RZKEY_F4,
+				Keyboard::RZKEY::RZKEY_F5,
+				Keyboard::RZKEY::RZKEY_F6,
+			};
+			int keysLength = sizeof(keys) / sizeof(int);
+
+			float t = ms * 0.002f;
+			float hp = fabsf(cos(MATH_PI / 2.0f + t));
+			for (int i = 0; i < keysLength; ++i) {
+				float ratio = (i + 1) / (float)keysLength;
+				int color = ChromaAnimationAPI::GetRGB(0, (int)(255 * (1 - hp)), 0);
+				if (((i + 1) / ((float)keysLength + 1)) < hp) {
+					color = ChromaAnimationAPI::GetRGB(0, 255, 0);
+				}
+				else {
+					color = ChromaAnimationAPI::GetRGB(0, 100, 0);
+				}
+				int key = keys[i];
+				SetKeyColor(colors, key, color);
+			}
+		}
+
+		// Show ammo animation
+		{
+			int keys[] = {
+				Keyboard::RZKEY::RZKEY_F7,
+				Keyboard::RZKEY::RZKEY_F8,
+				Keyboard::RZKEY::RZKEY_F9,
+				Keyboard::RZKEY::RZKEY_F10,
+				Keyboard::RZKEY::RZKEY_F11,
+				Keyboard::RZKEY::RZKEY_F12,
+			};
+			int keysLength = sizeof(keys) / sizeof(int);
+
+			float t = ms * 0.001f;
+			float hp = fabsf(cos(MATH_PI / 2.0f + t));
+			for (int i = 0; i < keysLength; ++i) {
+				float ratio = (i + 1) / (float)keysLength;
+				int color = ChromaAnimationAPI::GetRGB((int)(255 * (1 - hp)), (int)(255 * (1 - hp)), 0);
+				if (((i + 1) / ((float)keysLength + 1)) < hp) {
+					color = ChromaAnimationAPI::GetRGB(255, 255, 0);
+				}
+				else {
+					color = ChromaAnimationAPI::GetRGB(100, 100, 0);
+				}
+				int key = keys[i];
+				SetKeyColor(colors, key, color);
+			}
 		}
 
 		ChromaAnimationAPI::UpdateFrame(animationId, 0, 0.033f, colors, size);

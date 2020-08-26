@@ -18,7 +18,34 @@ const char* ANIMATION_FINAL = "Dynamic\\Final_Keyboard.chroma";
 
 static bool _sWaitForExit = true;
 
-void Setup()
+// Function prototypes
+void Cleanup();
+void GameLoop();
+int GetKeyColorIndex(int row, int column);
+void HandleInput();
+void Init();
+int main();
+void SetKeyColor(int* colors, int rzkey, int color);
+void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue);
+void SetupAnimations();
+
+void Init()
+{
+	if (ChromaAnimationAPI::InitAPI() != 0)
+	{
+		cerr << "Failed to load Chroma library!" << endl;
+		exit(1);
+	}
+	RZRESULT result = ChromaAnimationAPI::Init();
+	if (result != RZRESULT_SUCCESS)
+	{
+		cerr << "Failed to initialize Chroma!" << endl;
+		exit(1);
+	}
+	Sleep(100); //wait for init
+}
+
+void SetupAnimations()
 {
 	// Create a blank animation
 	int animationId = ChromaAnimationAPI::CreateAnimationInMemory((int)EChromaSDKDeviceTypeEnum::DE_2D, (int)EChromaSDKDevice2DEnum::DE_Keyboard);
@@ -72,23 +99,8 @@ void GameLoop()
 	delete[] colors;
 }
 
-int main()
+void HandleInput()
 {
-	if (ChromaAnimationAPI::InitAPI() != 0)
-	{
-		cerr << "Failed to load Chroma library!" << endl;
-		exit(1);
-	}
-	RZRESULT result = ChromaAnimationAPI::Init();
-	if (result != RZRESULT_SUCCESS)
-	{
-		cerr << "Failed to initialize Chroma!" << endl;
-		exit(1);
-	}
-	Sleep(100); //wait for init
-	cout << "Press ESC to Quit." << endl;
-	Setup();
-	thread thread(GameLoop);
 	while (_sWaitForExit)
 	{
 		int input = _getch();
@@ -100,14 +112,28 @@ int main()
 		}
 		Sleep(0);
 	}
-	thread.join();
+}
+
+void Cleanup()
+{
 	ChromaAnimationAPI::StopAll();
 	ChromaAnimationAPI::CloseAll();
-	result = ChromaAnimationAPI::Uninit();
+	RZRESULT result = ChromaAnimationAPI::Uninit();
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to uninitialize Chroma!" << endl;
 		exit(1);
 	}
+}
+
+int main()
+{
+	Init();
+	SetupAnimations();
+	thread thread(GameLoop);
+	cout << "Press ESC to Quit." << endl;
+	HandleInput();
+	thread.join();
+	Cleanup();
 	return 0;
 }

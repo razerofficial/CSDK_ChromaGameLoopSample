@@ -119,10 +119,17 @@ void GameLoop()
 			if (_sFrameSpiral < ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL))
 			{
 				ChromaAnimationAPI::SetCurrentFrame(animationSpiral, _sFrameSpiral);
-				cout << "Spiral: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_SPIRAL)) << " of " << ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL) << endl;;
+				int frameCount = ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL);
+				cout << "Spiral: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_SPIRAL)) << " of " << frameCount << endl;;
 				float duration;
 				ChromaAnimationAPI::GetFrame(animationSpiral, _sFrameSpiral, &duration, tempColors, size);
-				memcpy(colors, tempColors, sizeof(int) * size);
+				for (int i = 0; i < frameCount; ++i)
+				{
+					if (tempColors[i] != 0)
+					{
+						colors[i] = tempColors[i];
+					}
+				}
 				++_sFrameSpiral;
 			}
 			else
@@ -172,12 +179,10 @@ void HandleInput()
 		case 'r':
 		case 'R':
 			_sFrameRainbow = 0; //start
-			_sFrameSpiral = -1; //disable
 			break;
 		case 's':
 		case 'S':
 			_sFrameSpiral = 0; //start
-			_sFrameRainbow = -1; //disable
 			break;
 		}
 		Sleep(0);

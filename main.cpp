@@ -2,8 +2,10 @@
 //
 
 #include "Razer\ChromaAnimationAPI.h"
+#include <conio.h>
 #include <iostream>
 #include <string>
+#include <thread>
 
 using namespace ChromaSDK;
 using namespace std;
@@ -13,6 +15,8 @@ using namespace std;
 // This animation will be in immediate mode to avoid any caching
 // Any color changes will immediately display in the next frame update.
 const char* ANIMATION_FINAL = "Dynamic\\Final_Keyboard.chroma";
+
+static bool _sWaitForExit = true;
 
 void Setup()
 {
@@ -27,12 +31,6 @@ void Setup()
 
 	// Clear the cache
 	ChromaAnimationAPI::UnloadAnimationName(ANIMATION_FINAL);
-}
-
-void CleanUp()
-{
-	ChromaAnimationAPI::StopAll();
-	ChromaAnimationAPI::CloseAll();
 }
 
 int GetKeyColorIndex(int row, int column)
@@ -59,10 +57,10 @@ void GameLoop()
 	int size = maxRow * maxColumns;
 	int* colors = new int[size];
 	int animationId = ChromaAnimationAPI::GetAnimation(ANIMATION_FINAL);
-	while (true)
+	while (_sWaitForExit)
 	{
 		memset(colors, 0, sizeof(int) * size);
-		SetKeyColor(colors, (int)Keyboard::RZKEY::RZKEY_ESC, ChromaAnimationAPI::GetRGB(255, 255, 0));
+		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
 
 		ChromaAnimationAPI::UpdateFrame(animationId, 0, 0.033f, colors, size);
 
@@ -88,12 +86,28 @@ int main()
 		exit(1);
 	}
 	Sleep(100); //wait for init
+	cout << "Press ESC to Quit." << endl;
 	Setup();
-	GameLoop();
+	thread thread(GameLoop);
+	while (_sWaitForExit)
+	{
+		int input = _getch();
+		switch (input)
+		{
+		case 27:
+			_sWaitForExit = false;
+			break;
+		}
+		Sleep(0);
+	}
+	thread.join();
+	ChromaAnimationAPI::StopAll();
+	ChromaAnimationAPI::CloseAll();
 	result = ChromaAnimationAPI::Uninit();
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to uninitialize Chroma!" << endl;
 		exit(1);
 	}
+	return 0;
 }

@@ -22,10 +22,13 @@ const float MATH_PI = 3.14159f;
 const char* ANIMATION_FINAL = "Dynamic\\Final_Keyboard.chroma";
 const char* ANIMATION_RAINBOW = "Animations\\Rainbow_Keyboard.chroma";
 const char* ANIMATION_SPIRAL = "Animations\\Spiral_Keyboard.chroma";
+const char* ANIMATION_LANDSCAPE = "Animations\\Landscape_Keyboard.chroma";
 
 static bool _sWaitForExit = true;
+static bool _sHotkeys = true;
 static int _sFrameRainbow = -1;
 static int _sFrameSpiral = -1;
+static int _sFrameLandscape = -1;
 
 // Function prototypes
 void Cleanup();
@@ -109,6 +112,7 @@ void GameLoop()
 
 	int animationSpiral = ChromaAnimationAPI::GetAnimation(ANIMATION_SPIRAL);
 	int animationRainbow = ChromaAnimationAPI::GetAnimation(ANIMATION_RAINBOW);
+	int animationLandscape = ChromaAnimationAPI::GetAnimation(ANIMATION_LANDSCAPE);
 
 	while (_sWaitForExit)
 	{
@@ -126,7 +130,7 @@ void GameLoop()
 			if (_sFrameRainbow < ChromaAnimationAPI::GetFrameCountName(ANIMATION_RAINBOW))
 			{
 				ChromaAnimationAPI::SetCurrentFrame(animationRainbow, _sFrameRainbow);
-				cout << "Rainbow: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_RAINBOW)) << " of " << ChromaAnimationAPI::GetFrameCountName(ANIMATION_RAINBOW) << endl;;
+				//cout << "Rainbow: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_RAINBOW)) << " of " << ChromaAnimationAPI::GetFrameCountName(ANIMATION_RAINBOW) << endl;;
 				float duration;
 				ChromaAnimationAPI::GetFrame(animationRainbow, _sFrameRainbow, &duration, tempColors, size);
 				memcpy(colors, tempColors, sizeof(int) * size);
@@ -145,7 +149,7 @@ void GameLoop()
 			{
 				ChromaAnimationAPI::SetCurrentFrame(animationSpiral, _sFrameSpiral);
 				int frameCount = ChromaAnimationAPI::GetFrameCountName(ANIMATION_SPIRAL);
-				cout << "Spiral: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_SPIRAL)) << " of " << frameCount << endl;;
+				//cout << "Spiral: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_SPIRAL)) << " of " << frameCount << endl;;
 				float duration;
 				ChromaAnimationAPI::GetFrame(animationSpiral, _sFrameSpiral, &duration, tempColors, size);
 				for (int i = 0; i < size; ++i)
@@ -163,78 +167,112 @@ void GameLoop()
 			}
 		}
 
-		// Show hotkeys
-		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
-		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
-		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
-		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
-		SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
-
-		// Highlight R if rainbow is active
-		if (_sFrameRainbow >= 0)
+		// add or blend landscape
+		if (_sFrameLandscape >= 0)
 		{
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
-		}
-
-		// Highlight S if spiral is active
-		if (_sFrameSpiral >= 0)
-		{
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
-		}
-
-		// SHow health animation
-		{
-			int keys[] = {
-				Keyboard::RZKEY::RZKEY_F1,
-				Keyboard::RZKEY::RZKEY_F2,
-				Keyboard::RZKEY::RZKEY_F3,
-				Keyboard::RZKEY::RZKEY_F4,
-				Keyboard::RZKEY::RZKEY_F5,
-				Keyboard::RZKEY::RZKEY_F6,
-			};
-			int keysLength = sizeof(keys) / sizeof(int);
-
-			float t = ms * 0.002f;
-			float hp = fabsf(cos(MATH_PI / 2.0f + t));
-			for (int i = 0; i < keysLength; ++i) {
-				float ratio = (i + 1) / (float)keysLength;
-				int color = ChromaAnimationAPI::GetRGB(0, (int)(255 * (1 - hp)), 0);
-				if (((i + 1) / ((float)keysLength + 1)) < hp) {
-					color = ChromaAnimationAPI::GetRGB(0, 255, 0);
+			if (_sFrameLandscape < ChromaAnimationAPI::GetFrameCountName(ANIMATION_LANDSCAPE))
+			{
+				ChromaAnimationAPI::SetCurrentFrame(animationLandscape, _sFrameLandscape);
+				int frameCount = ChromaAnimationAPI::GetFrameCountName(ANIMATION_LANDSCAPE);
+				//cout << "Landscape: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_LANDSCAPE)) << " of " << frameCount << endl;;
+				float duration;
+				ChromaAnimationAPI::GetFrame(animationLandscape, _sFrameLandscape, &duration, tempColors, size);
+				for (int i = 0; i < size; ++i)
+				{
+					if (tempColors[i] != 0)
+					{
+						colors[i] = tempColors[i];
+					}
 				}
-				else {
-					color = ChromaAnimationAPI::GetRGB(0, 100, 0);
-				}
-				int key = keys[i];
-				SetKeyColor(colors, key, color);
+				++_sFrameLandscape;
+			}
+			else
+			{
+				_sFrameLandscape = -1;
 			}
 		}
 
-		// Show ammo animation
+		if (_sHotkeys)
 		{
-			int keys[] = {
-				Keyboard::RZKEY::RZKEY_F7,
-				Keyboard::RZKEY::RZKEY_F8,
-				Keyboard::RZKEY::RZKEY_F9,
-				Keyboard::RZKEY::RZKEY_F10,
-				Keyboard::RZKEY::RZKEY_F11,
-				Keyboard::RZKEY::RZKEY_F12,
-			};
-			int keysLength = sizeof(keys) / sizeof(int);
+			// Show hotkeys
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
 
-			float t = ms * 0.001f;
-			float hp = fabsf(cos(MATH_PI / 2.0f + t));
-			for (int i = 0; i < keysLength; ++i) {
-				float ratio = (i + 1) / (float)keysLength;
-				int color = ChromaAnimationAPI::GetRGB((int)(255 * (1 - hp)), (int)(255 * (1 - hp)), 0);
-				if (((i + 1) / ((float)keysLength + 1)) < hp) {
-					color = ChromaAnimationAPI::GetRGB(255, 255, 0);
+			// Highlight R if rainbow is active
+			if (_sFrameRainbow >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
+			}
+
+			// Highlight S if spiral is active
+			if (_sFrameSpiral >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+			}
+
+			// Highlight L if landscape is active
+			if (_sFrameLandscape >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
+			}
+
+			// SHow health animation
+			{
+				int keys[] = {
+					Keyboard::RZKEY::RZKEY_F1,
+					Keyboard::RZKEY::RZKEY_F2,
+					Keyboard::RZKEY::RZKEY_F3,
+					Keyboard::RZKEY::RZKEY_F4,
+					Keyboard::RZKEY::RZKEY_F5,
+					Keyboard::RZKEY::RZKEY_F6,
+				};
+				int keysLength = sizeof(keys) / sizeof(int);
+
+				float t = ms * 0.002f;
+				float hp = fabsf(cos(MATH_PI / 2.0f + t));
+				for (int i = 0; i < keysLength; ++i) {
+					float ratio = (i + 1) / (float)keysLength;
+					int color = ChromaAnimationAPI::GetRGB(0, (int)(255 * (1 - hp)), 0);
+					if (((i + 1) / ((float)keysLength + 1)) < hp) {
+						color = ChromaAnimationAPI::GetRGB(0, 255, 0);
+					}
+					else {
+						color = ChromaAnimationAPI::GetRGB(0, 100, 0);
+					}
+					int key = keys[i];
+					SetKeyColor(colors, key, color);
 				}
-				else {
-					color = ChromaAnimationAPI::GetRGB(100, 100, 0);
+			}
+
+			// Show ammo animation
+			{
+				int keys[] = {
+					Keyboard::RZKEY::RZKEY_F7,
+					Keyboard::RZKEY::RZKEY_F8,
+					Keyboard::RZKEY::RZKEY_F9,
+					Keyboard::RZKEY::RZKEY_F10,
+					Keyboard::RZKEY::RZKEY_F11,
+					Keyboard::RZKEY::RZKEY_F12,
+				};
+				int keysLength = sizeof(keys) / sizeof(int);
+
+				float t = ms * 0.001f;
+				float hp = fabsf(cos(MATH_PI / 2.0f + t));
+				for (int i = 0; i < keysLength; ++i) {
+					float ratio = (i + 1) / (float)keysLength;
+					int color = ChromaAnimationAPI::GetRGB((int)(255 * (1 - hp)), (int)(255 * (1 - hp)), 0);
+					if (((i + 1) / ((float)keysLength + 1)) < hp) {
+						color = ChromaAnimationAPI::GetRGB(255, 255, 0);
+					}
+					else {
+						color = ChromaAnimationAPI::GetRGB(100, 100, 0);
+					}
+					int key = keys[i];
+					SetKeyColor(colors, key, color);
 				}
-				int key = keys[i];
-				SetKeyColor(colors, key, color);
 			}
 		}
 
@@ -267,6 +305,14 @@ void HandleInput()
 		case 'S':
 			_sFrameSpiral = 0; //start
 			break;
+		case 'l':
+		case 'L':
+			_sFrameLandscape = 0; //start
+			break;
+		case 'h':
+		case 'H':
+			_sHotkeys = !_sHotkeys;
+			break;
 		}
 		Sleep(0);
 	}
@@ -292,6 +338,8 @@ int main()
 	cout << "Press `ESC` to Quit." << endl;
 	cout << "Press `R` for rainbow." << endl;
 	cout << "Press `S` for spiral." << endl;
+	cout << "Press `L` for landscape." << endl;
+	cout << "Press `H` to toggle hotkeys." << endl;
 	HandleInput();
 	thread.join();
 	Cleanup();

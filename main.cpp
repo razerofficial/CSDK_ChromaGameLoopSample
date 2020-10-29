@@ -23,12 +23,15 @@ const char* ANIMATION_FINAL = "Dynamic\\Final_Keyboard.chroma";
 const char* ANIMATION_RAINBOW = "Animations\\Rainbow_Keyboard.chroma";
 const char* ANIMATION_SPIRAL = "Animations\\Spiral_Keyboard.chroma";
 const char* ANIMATION_LANDSCAPE = "Animations\\Landscape_Keyboard.chroma";
+const char* ANIMATION_FIRE = "Animations\\Fire_Keyboard.chroma";
 
 static bool _sWaitForExit = true;
 static bool _sHotkeys = true;
+static bool _sAmmo = false;
 static int _sFrameRainbow = -1;
 static int _sFrameSpiral = -1;
 static int _sFrameLandscape = -1;
+static int _sFrameFire = -1;
 
 // Function prototypes
 void Cleanup();
@@ -113,6 +116,7 @@ void GameLoop()
 	int animationSpiral = ChromaAnimationAPI::GetAnimation(ANIMATION_SPIRAL);
 	int animationRainbow = ChromaAnimationAPI::GetAnimation(ANIMATION_RAINBOW);
 	int animationLandscape = ChromaAnimationAPI::GetAnimation(ANIMATION_LANDSCAPE);
+	int animationFire = ChromaAnimationAPI::GetAnimation(ANIMATION_FIRE);
 
 	while (_sWaitForExit)
 	{
@@ -192,38 +196,33 @@ void GameLoop()
 			}
 		}
 
-		if (_sHotkeys)
+		// add or blend fire
+		if (_sFrameFire >= 0)
 		{
-			// Show hotkeys
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
-			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
-
-			// Highlight R if rainbow is active
-			if (_sFrameRainbow >= 0)
+			if (_sFrameFire < ChromaAnimationAPI::GetFrameCountName(ANIMATION_FIRE))
 			{
-				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
+				ChromaAnimationAPI::SetCurrentFrame(animationFire, _sFrameFire);
+				int frameCount = ChromaAnimationAPI::GetFrameCountName(ANIMATION_FIRE);
+				//cout << "Fire: " << (1 + ChromaAnimationAPI::GetCurrentFrameName(ANIMATION_FIRE)) << " of " << frameCount << endl;;
+				float duration;
+				ChromaAnimationAPI::GetFrame(animationFire, _sFrameFire, &duration, tempColors, size);
+				for (int i = 0; i < size; ++i)
+				{
+					if (tempColors[i] != 0)
+					{
+						colors[i] = tempColors[i];
+					}
+				}
+				++_sFrameFire;
 			}
-
-			// Highlight S if spiral is active
-			if (_sFrameSpiral >= 0)
+			else
 			{
-				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+				_sFrameFire = -1;
 			}
+		}
 
-			// Highlight L if landscape is active
-			if (_sFrameLandscape >= 0)
-			{
-				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
-			}
-
-			if (_sHotkeys)
-			{
-				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
-			}
-
+		if (_sAmmo)
+		{
 			// SHow health animation
 			{
 				int keys[] = {
@@ -281,6 +280,50 @@ void GameLoop()
 			}
 		}
 
+		if (_sHotkeys)
+		{
+			// Show hotkeys
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
+			SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
+
+			if (_sAmmo)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_A, 0, 255, 0);
+			}
+
+			// Highlight R if rainbow is active
+			if (_sFrameRainbow >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
+			}
+
+			// Highlight S if spiral is active
+			if (_sFrameSpiral >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+			}
+
+			// Highlight L if landscape is active
+			if (_sFrameLandscape >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
+			}
+
+			// Highlight L if landscape is active
+			if (_sFrameFire >= 0)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_F, 0, 255, 0);
+			}
+
+			if (_sHotkeys)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
+			}
+		}
+
 		ChromaAnimationAPI::UpdateFrame(animationId, 0, 0.033f, colors, size);
 
 		// display the change
@@ -335,6 +378,21 @@ void HandleInput()
 				_sFrameLandscape = -1;
 			}
 			break;
+		case 'f':
+		case 'F':
+			if (_sFrameFire < 0)
+			{
+				_sFrameFire = 0; //start
+			}
+			else
+			{
+				_sFrameFire = -1;
+			}
+			break;
+		case 'a':
+		case 'A':
+			_sAmmo = !_sAmmo;
+			break;
 		case 'h':
 		case 'H':
 			_sHotkeys = !_sHotkeys;
@@ -362,10 +420,13 @@ int main()
 	SetupAnimations();
 	thread thread(GameLoop);
 	cout << "Press `ESC` to Quit." << endl;
+	cout << "Press `A` for ammo/health." << endl;
+	cout << "Press `F` for fire." << endl;
+	cout << "Press `H` to toggle hotkeys." << endl;
+	cout << "Press `L` for landscape." << endl;
 	cout << "Press `R` for rainbow." << endl;
 	cout << "Press `S` for spiral." << endl;
-	cout << "Press `L` for landscape." << endl;
-	cout << "Press `H` to toggle hotkeys." << endl;
+
 	HandleInput();
 	thread.join();
 	Cleanup();

@@ -219,6 +219,11 @@ void GameLoop()
 				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
 			}
 
+			if (_sHotkeys)
+			{
+				SetKeyColorRGB(colors, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
+			}
+
 			// SHow health animation
 			{
 				int keys[] = {
@@ -299,15 +304,36 @@ void HandleInput()
 			break;
 		case 'r':
 		case 'R':
-			_sFrameRainbow = 0; //start
+			if (_sFrameRainbow < 0)
+			{
+				_sFrameRainbow = 0; //start
+			}
+			else
+			{
+				_sFrameRainbow = -1;
+			}
 			break;
 		case 's':
 		case 'S':
-			_sFrameSpiral = 0; //start
+			if (_sFrameSpiral < 0)
+			{
+				_sFrameSpiral = 0; //start
+			}
+			else
+			{
+				_sFrameSpiral = -1;
+			}
 			break;
 		case 'l':
 		case 'L':
-			_sFrameLandscape = 0; //start
+			if (_sFrameLandscape < 0)
+			{
+				_sFrameLandscape = 0; //start
+			}
+			else
+			{
+				_sFrameLandscape = -1;
+			}
 			break;
 		case 'h':
 		case 'H':

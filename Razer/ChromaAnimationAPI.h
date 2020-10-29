@@ -2405,6 +2405,16 @@ typedef void		(*PLUGIN_UNLOAD_COMPOSITE)(const char* name);
 */
 typedef int			(*PLUGIN_UPDATE_FRAME)(int animationId, int frameIndex, float duration, int* colors, int length);
 /*
+	Updates the `frameIndex` of the `Chroma` animation and sets the `duration`
+	(in seconds). The `color` is expected to be an array of the dimensions
+	for the `deviceType/device`. The `length` parameter is the size of the
+	`color` array. For `EChromaSDKDevice1DEnum` the array size should be `MAX
+	LEDS`. For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW`
+	* `MAX COLUMN`. Returns the animation id upon success. Returns -1 upon
+	failure.
+*/
+typedef int			(*PLUGIN_UPDATE_FRAME_NAME)(const char* path, int frameIndex, float duration, int* colors, int length);
+/*
 	When the idle animation flag is true, when no other animations are playing, 
 	the idle animation will be used. The idle animation will not be affected 
 	by the API calls to PluginIsPlaying, PluginStopAnimationType, PluginGetPlayingAnimationId, 
@@ -4826,6 +4836,16 @@ namespace ChromaSDK
 			failure.
 		*/
 		CHROMASDK_DECLARE_METHOD(PLUGIN_UPDATE_FRAME, UpdateFrame);
+		/*
+			Updates the `frameIndex` of the `Chroma` animation and sets the `duration`
+			(in seconds). The `color` is expected to be an array of the dimensions
+			for the `deviceType/device`. The `length` parameter is the size of the
+			`color` array. For `EChromaSDKDevice1DEnum` the array size should be `MAX
+			LEDS`. For `EChromaSDKDevice2DEnum` the array size should be `MAX ROW`
+			* `MAX COLUMN`. Returns the animation id upon success. Returns -1 upon
+			failure.
+		*/
+		CHROMASDK_DECLARE_METHOD(PLUGIN_UPDATE_FRAME_NAME, UpdateFrameName);
 		/*
 			When the idle animation flag is true, when no other animations are playing, 
 			the idle animation will be used. The idle animation will not be affected 

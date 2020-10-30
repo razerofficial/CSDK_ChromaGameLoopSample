@@ -229,9 +229,9 @@ int MultiplyColor(int color1, int color2) {
 	int greenColor2 = (color2 >> 8) & 0xFF;
 	int blueColor2 = (color2 >> 16) & 0xFF;
 
-	int red = floor(255 * ((redColor1 / 255.0f) * (redColor2 / 255.0f)));
-	int green = floor(255 * ((greenColor1 / 255.0f) * (greenColor2 / 255.0f)));
-	int blue = floor(255 * ((blueColor1 / 255.0f) * (blueColor2 / 255.0f)));
+	int red = (int)floor(255 * ((redColor1 / 255.0f) * (redColor2 / 255.0f)));
+	int green = (int)floor(255 * ((greenColor1 / 255.0f) * (greenColor2 / 255.0f)));
+	int blue = (int)floor(255 * ((blueColor1 / 255.0f) * (blueColor2 / 255.0f)));
 
 	return ChromaAnimationAPI::GetRGB(red, green, blue);
 }
@@ -684,25 +684,25 @@ void GameLoop()
 			}
 
 			// Highlight R if rainbow is active
-			if (_sScene._mEffects[_sIndexRainbow]._mState >= 0)
+			if (_sScene._mEffects[_sIndexRainbow]._mState)
 			{
 				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
 			}
 
 			// Highlight S if spiral is active
-			if (_sScene._mEffects[_sIndexSpiral]._mState >= 0)
+			if (_sScene._mEffects[_sIndexSpiral]._mState)
 			{
 				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
 			}
 
 			// Highlight L if landscape is active
-			if (_sScene._mEffects[_sIndexLandscape]._mState >= 0)
+			if (_sScene._mEffects[_sIndexLandscape]._mState)
 			{
 				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
 			}
 
 			// Highlight L if landscape is active
-			if (_sScene._mEffects[_sIndexFire]._mState >= 0)
+			if (_sScene._mEffects[_sIndexFire]._mState)
 			{
 				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_F, 0, 255, 0);
 			}
@@ -812,7 +812,7 @@ int main()
 	effect._mState = false;
 	effect._mMode = "replace";
 	_sScene._mEffects.push_back(effect);
-	_sIndexLandscape = _sScene._mEffects.size() - 1;
+	_sIndexLandscape = (int)_sScene._mEffects.size() - 1;
 
 	effect = Effect();
 	effect._mAnimation = "Animations/Fire";
@@ -821,7 +821,7 @@ int main()
 	effect._mState = false;
 	effect._mMode = "replace";
 	_sScene._mEffects.push_back(effect);
-	_sIndexFire = _sScene._mEffects.size() - 1;
+	_sIndexFire = (int)_sScene._mEffects.size() - 1;
 
 	effect = Effect();
 	effect._mAnimation = "Animations/Rainbow";
@@ -830,7 +830,7 @@ int main()
 	effect._mState = false;
 	effect._mMode = "replace";
 	_sScene._mEffects.push_back(effect);
-	_sIndexRainbow = _sScene._mEffects.size() - 1;
+	_sIndexRainbow = (int)_sScene._mEffects.size() - 1;
 
 	effect = Effect();
 	effect._mAnimation = "Animations/Spiral";
@@ -839,7 +839,7 @@ int main()
 	effect._mState = false;
 	effect._mMode = "replace";
 	_sScene._mEffects.push_back(effect);
-	_sIndexSpiral = _sScene._mEffects.size() - 1;
+	_sIndexSpiral = (int)_sScene._mEffects.size() - 1;
 
 	Init();
 

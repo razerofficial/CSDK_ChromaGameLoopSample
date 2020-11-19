@@ -556,29 +556,6 @@ void BlendAnimations(Scene& scene,
 	}
 }
 
-#define UNIT_TEST_PERFORMANCE false
-
-#if UNIT_TEST_PERFORMANCE
-
-static bool _sNapTime = false;
-
-void KeepThreadBusy()
-{
-	volatile unsigned x = 0, y = 1;
-	while ((x++ || y++) && _sWaitForExit)
-	{
-		this_thread::yield();
-
-		if (_sNapTime)
-		{
-			Sleep(0);
-		}
-	}
-}
-
-#endif
-
-
 void GameLoop()
 {
 	const int sizeChromaLink = GetColorArraySize1D(EChromaSDKDevice1DEnum::DE_ChromaLink);
@@ -604,10 +581,6 @@ void GameLoop()
 
 	while (_sWaitForExit)
 	{
-
-#if UNIT_TEST_PERFORMANCE
-		_sNapTime = true; //avoid starving frame updates
-#endif
 
 		// get time
 		struct timeval tp;
@@ -747,10 +720,6 @@ void GameLoop()
 		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSE, 0, 0.1f, colorsMouse, sizeMouse);
 		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSEPAD, 0, 0.1f, colorsMousepad, sizeMousepad);
 
-#if UNIT_TEST_PERFORMANCE
-		_sNapTime = true; //avoid starving the SDK
-#endif
-
 		// display the change
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_CHROMA_LINK, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_HEADSET, 0);
@@ -758,10 +727,6 @@ void GameLoop()
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_KEYPAD, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_MOUSE, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_MOUSEPAD, 0);
-
-#if UNIT_TEST_PERFORMANCE
-		_sNapTime = false;
-#endif
 
 		Sleep(33); //30 FPS
 	}
@@ -878,15 +843,6 @@ int main()
 
 	Init();
 
-#if UNIT_TEST_PERFORMANCE
-	constexpr int numBusyThreads = 8;
-	thread threads[numBusyThreads];
-	for (int i = 0; i < numBusyThreads; ++i)
-	{
-		threads[i] = thread(KeepThreadBusy);
-	}
-#endif
-
 	thread thread(GameLoop);
 	cout << "Press `ESC` to Quit." << endl;
 	cout << "Press `A` for ammo/health." << endl;
@@ -897,13 +853,6 @@ int main()
 	cout << "Press `S` for spiral." << endl;
 
 	HandleInput();
-
-#if UNIT_TEST_PERFORMANCE
-	for (int i = 0; i < numBusyThreads; ++i)
-	{
-		threads[i].join();
-	}
-#endif
 
 	thread.join();
 	Cleanup();

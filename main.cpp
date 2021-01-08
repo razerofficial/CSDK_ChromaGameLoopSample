@@ -27,10 +27,10 @@ const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
 static bool _sWaitForExit = true;
 static bool _sHotkeys = true;
 static bool _sAmmo = false;
-static int _sIndexLandscape = 0;
-static int _sIndexFire = 1;
-static int _sIndexRainbow = 1;
-static int _sIndexSpiral = 1;
+static int _sIndexLandscape = -1;
+static int _sIndexFire = -1;
+static int _sIndexRainbow = -1;
+static int _sIndexSpiral = -1;
 
 // Function prototypes
 void Cleanup();

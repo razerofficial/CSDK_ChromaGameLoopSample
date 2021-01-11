@@ -7,6 +7,7 @@
 #include <conio.h>
 #include <iostream>
 #include <string>
+#include <tchar.h>
 #include <time.h>
 #include <thread>
 
@@ -86,7 +87,26 @@ void Init()
 		cerr << "Failed to load Chroma library!" << endl;
 		exit(1);
 	}
-	RZRESULT result = ChromaAnimationAPI::Init();
+
+	ChromaSDK::APPINFOTYPE appInfo = {};
+
+	_tcscpy_s(appInfo.Title, 256, _T("Razer Chroma CSDK Game Loop Sample Application"));
+	_tcscpy_s(appInfo.Description, 1024, _T("A sample application using Razer Chroma SDK"));
+	_tcscpy_s(appInfo.Author.Name, 256, _T("Razer"));
+	_tcscpy_s(appInfo.Author.Contact, 256, _T("https://developer.razer.com/chroma"));
+
+	//appInfo.SupportedDevice = 
+	//    0x01 | // Keyboards
+	//    0x02 | // Mice
+	//    0x04 | // Headset
+	//    0x08 | // Mousepads
+	//    0x10 | // Keypads
+	//    0x20   // ChromaLink devices
+	//    ;
+	appInfo.SupportedDevice = (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20);
+	appInfo.Category = 1;
+
+	RZRESULT result = ChromaAnimationAPI::InitSDK(&appInfo);
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to initialize Chroma!" << endl;
@@ -585,7 +605,7 @@ void GameLoop()
 		// get time
 		struct timeval tp;
 		gettimeofday(&tp, NULL);
-		long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+		long int timeMS = tp.tv_sec * 1000 + tp.tv_usec / 1000;
 
 		// start with a blank frame
 		memset(colorsChromaLink, 0, sizeof(int) * sizeChromaLink);
@@ -624,11 +644,11 @@ void GameLoop()
 				};
 				int keysLength = sizeof(keys) / sizeof(int);
 
-				float t = ms * 0.002f;
+				float t = timeMS * 0.002f;
 				float hp = fabsf(cos(MATH_PI / 2.0f + t));
 				for (int i = 0; i < keysLength; ++i) {
 					float ratio = (i + 1) / (float)keysLength;
-					int color = ChromaAnimationAPI::GetRGB(0, (int)(255 * (1 - hp)), 0);
+					int color;
 					if (((i + 1) / ((float)keysLength + 1)) < hp) {
 						color = ChromaAnimationAPI::GetRGB(0, 255, 0);
 					}
@@ -652,11 +672,11 @@ void GameLoop()
 				};
 				int keysLength = sizeof(keys) / sizeof(int);
 
-				float t = ms * 0.001f;
+				float t = timeMS * 0.001f;
 				float hp = fabsf(cos(MATH_PI / 2.0f + t));
 				for (int i = 0; i < keysLength; ++i) {
 					float ratio = (i + 1) / (float)keysLength;
-					int color = ChromaAnimationAPI::GetRGB((int)(255 * (1 - hp)), (int)(255 * (1 - hp)), 0);
+					int color;
 					if (((i + 1) / ((float)keysLength + 1)) < hp) {
 						color = ChromaAnimationAPI::GetRGB(255, 255, 0);
 					}

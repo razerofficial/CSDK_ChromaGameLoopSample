@@ -52,7 +52,7 @@ namespace ChromaSDK
 		DE_Keypad,
 		DE_Mouse,
 		DE_Mousepad,
-		DE_MAX
+		DE_MAX,
 	};
 
 	enum EChromaSDKKeyboardKey
@@ -246,8 +246,6 @@ namespace ChromaSDK
 	struct FChromaSDKColors
 	{
 		std::vector<COLORREF> Colors;
-		FChromaSDKColors();
-		FChromaSDKColors(const FChromaSDKColors& copy);
 	};
 
 	struct FChromaSDKColorFrame1D
@@ -257,7 +255,6 @@ namespace ChromaSDK
 		float Duration;
 
 		FChromaSDKColorFrame1D();
-		FChromaSDKColorFrame1D(const FChromaSDKColorFrame1D& copy);
 	};
 
 	struct FChromaSDKColorFrame2D
@@ -267,6 +264,5 @@ namespace ChromaSDK
 		float Duration;
 
 		FChromaSDKColorFrame2D();
-		FChromaSDKColorFrame2D(const FChromaSDKColorFrame2D& copy);
 	};
 }

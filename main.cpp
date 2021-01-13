@@ -1,6 +1,11 @@
 // CSDK_ChromaGameLoopSample.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+// When true, the sample will set Chroma effects directly from Arrays
+// When false, the sample will use dynamic animations that set Chroma effects
+// using the first frame of the dynamic animation.
+#define USE_ARRAY_EFFECTS true
+
 #include "Razer\ChromaAnimationAPI.h"
 #include <array>
 #include <chrono>
@@ -157,6 +162,8 @@ const int GetColorArraySize2D(EChromaSDKDevice2DEnum device)
 	return maxRow * maxColumn;
 }
 
+#if !USE_ARRAY_EFFECTS
+
 void SetupAnimation1D(const char* path, EChromaSDKDevice1DEnum device)
 {
 	int animationId = ChromaAnimationAPI::GetAnimation(path);
@@ -180,6 +187,7 @@ void SetupAnimation2D(const char* path, EChromaSDKDevice2DEnum device)
 		ChromaAnimationAPI::MakeBlankFramesName(path, 1, 0.1f, 0);
 	}
 }
+#endif
 
 void SetAmbientColor1D(EChromaSDKDevice1DEnum device, int* colors, int ambientColor)
 {
@@ -614,6 +622,8 @@ void GameLoop()
 		memset(colorsKeypad, 0, sizeof(int) * sizeKeypad);
 		memset(colorsMouse, 0, sizeof(int) * sizeMouse);
 		memset(colorsMousepad, 0, sizeof(int) * sizeMousepad);
+		
+#if !USE_ARRAY_EFFECTS
 
 		SetupAnimation1D(ANIMATION_FINAL_CHROMA_LINK, EChromaSDKDevice1DEnum::DE_ChromaLink);
 		SetupAnimation1D(ANIMATION_FINAL_HEADSET, EChromaSDKDevice1DEnum::DE_Headset);
@@ -621,6 +631,8 @@ void GameLoop()
 		SetupAnimation2D(ANIMATION_FINAL_KEYPAD, EChromaSDKDevice2DEnum::DE_Keypad);
 		SetupAnimation2D(ANIMATION_FINAL_MOUSE, EChromaSDKDevice2DEnum::DE_Mouse);
 		SetupAnimation1D(ANIMATION_FINAL_MOUSEPAD, EChromaSDKDevice1DEnum::DE_Mousepad);
+		
+#endif
 
 		BlendAnimations(_sScene,
 			colorsChromaLink, tempColorsChromaLink,
@@ -733,6 +745,20 @@ void GameLoop()
 			}
 		}
 
+#if USE_ARRAY_EFFECTS
+
+		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_ChromaLink, colorsChromaLink);
+		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Headset, colorsHeadset);
+		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Mousepad, colorsMousepad);
+
+		ChromaAnimationAPI::SetCustomColorFlag2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard);
+		ChromaAnimationAPI::SetEffectKeyboardCustom2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard);
+
+		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Keypad, colorsKeypad);
+		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Mouse, colorsMouse);
+
+#else
+
 		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_CHROMA_LINK, 0, 0.1f, colorsChromaLink, sizeChromaLink);
 		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_HEADSET, 0, 0.1f, colorsHeadset, sizeHeadset);
 		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYBOARD, 0, 0.1f, colorsKeyboard, sizeKeyboard);
@@ -747,6 +773,9 @@ void GameLoop()
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_KEYPAD, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_MOUSE, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_MOUSEPAD, 0);
+
+#endif
+		
 
 		Sleep(33); //30 FPS
 	}

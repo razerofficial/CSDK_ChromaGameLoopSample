@@ -21,6 +21,8 @@ using namespace std;
 
 const float MATH_PI = 3.14159f;
 
+#if !USE_ARRAY_EFFECTS
+
 // This final animation will have a single frame
 // Any color changes will immediately display in the next frame update.
 const char* ANIMATION_FINAL_CHROMA_LINK = "Dynamic\\Final_ChromaLink.chroma";
@@ -29,6 +31,8 @@ const char* ANIMATION_FINAL_KEYBOARD = "Dynamic\\Final_Keyboard.chroma";
 const char* ANIMATION_FINAL_KEYPAD = "Dynamic\\Final_Keypad.chroma";
 const char* ANIMATION_FINAL_MOUSE = "Dynamic\\Final_Mouse.chroma";
 const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
+
+#endif
 
 static bool _sWaitForExit = true;
 static bool _sHotkeys = true;

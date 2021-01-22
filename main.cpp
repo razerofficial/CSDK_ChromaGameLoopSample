@@ -855,6 +855,8 @@ void Cleanup()
 
 int main()
 {
+	fprintf(stdout, "C++ GAME LOOP CHROMA SAMPLE APP\r\n\r\n");
+
 	// setup scene
 	_sScene = Scene();
 

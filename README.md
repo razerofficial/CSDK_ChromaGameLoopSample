@@ -54,3 +54,7 @@
 ## About ##
 
 The `Chroma Gameloop Sample App` is a C++ sample project that dynamically sets colors in a game loop.
+
+**Screenshot:**
+
+![image_2](/images/image_2.png)

@@ -26,7 +26,7 @@ namespace ChromaSDK
 	typedef RZRESULT(*CHROMA_SDK_UNREGISTER_EVENT_NOTIFICATION)(void);
 	typedef RZRESULT(*CHROMA_SDK_QUERY_DEVICE)(RZDEVICEID DeviceId, ChromaSDK::DEVICE_INFO_TYPE &DeviceInfo);
 
-	enum EChromaSDKDeviceTypeEnum
+	enum class EChromaSDKDeviceTypeEnum
 	{
 		DE_1D = 0,
 		DE_2D,
@@ -57,7 +57,7 @@ namespace ChromaSDK
 		DE_MAX,
 	};
 
-	enum EChromaSDKKeyboardKey
+	enum class EChromaSDKKeyboardKey
 	{
 		KK_ESC,
 		KK_F1,
@@ -186,7 +186,7 @@ namespace ChromaSDK
 		KK_INVALID,
 	};
 
-	enum EChromaSDKMouseLED
+	enum class EChromaSDKMouseLED
 	{
 		ML_SCROLLWHEEL,
 		ML_LOGO,
@@ -283,7 +283,7 @@ namespace ChromaSDK
 		int _mFrameIndex[6];
 	};
 
-	enum EChromaSDKSceneBlend
+	enum class EChromaSDKSceneBlend
 	{
 		SB_None,
 		SB_Invert,
@@ -291,7 +291,7 @@ namespace ChromaSDK
 		SB_Lerp,
 	};
 
-	enum EChromaSDKSceneMode
+	enum class EChromaSDKSceneMode
 	{
 		SM_Replace,
 		SM_Max,

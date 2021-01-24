@@ -106,18 +106,6 @@ void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue)
 	SetKeyColor(colors, rzkey, ChromaAnimationAPI::GetRGB(red, green, blue));
 }
 
-//ref: https://stackoverflow.com/questions/10905892/equivalent-of-gettimeday-for-windows
-int gettimeofday(struct timeval* tp, struct timezone* tzp) {
-	namespace sc = std::chrono;
-	sc::system_clock::duration d = sc::system_clock::now().time_since_epoch();
-	sc::seconds s = sc::duration_cast<sc::seconds>(d);
-	tp->tv_sec = (long)s.count();
-	tp->tv_usec = (long)sc::duration_cast<sc::microseconds>(d - s).count();
-
-	return 0;
-}
-
-
 const int GetColorArraySize1D(EChromaSDKDevice1DEnum device)
 {
 	const int maxLeds = ChromaAnimationAPI::GetMaxLeds((int)device);
@@ -570,14 +558,10 @@ void GameLoop()
 	int* tempColorsMouse = new int[sizeMouse];
 	int* tempColorsMousepad = new int[sizeMousepad];
 
+	int timeMS = 0;
+
 	while (_sWaitForExit)
 	{
-
-		// get time
-		struct timeval tp;
-		gettimeofday(&tp, NULL);
-		long int timeMS = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-
 		// start with a blank frame
 		memset(colorsChromaLink, 0, sizeof(int) * sizeChromaLink);
 		memset(colorsHeadset, 0, sizeof(int) * sizeHeadset);
@@ -741,6 +725,7 @@ void GameLoop()
 		
 
 		Sleep(33); //30 FPS
+		timeMS += 33;
 	}
 	
 	delete[] colorsChromaLink;

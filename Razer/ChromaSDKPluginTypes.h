@@ -4,6 +4,8 @@
 #include "RzChromaSDKDefines.h"
 #include "RzChromaSDKTypes.h"
 #include "RzErrors.h"
+
+#include <string>
 #include <vector>
 
 namespace ChromaSDK
@@ -264,5 +266,59 @@ namespace ChromaSDK
 		float Duration;
 
 		FChromaSDKColorFrame2D();
+	};
+
+	struct FChromaSDKDeviceFrameIndex
+	{
+	public:
+		FChromaSDKDeviceFrameIndex() {
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_ChromaLink] = 0;
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Headset] = 0;
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Keyboard] = 0;
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Keypad] = 0;
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Mouse] = 0;
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Mousepad] = 0;
+		}
+		// Index corresponds to EChromaSDKDeviceEnum;
+		int _mFrameIndex[6];
+	};
+
+	enum EChromaSDKSceneBlend
+	{
+		SB_None,
+		SB_Invert,
+		SB_Threshold,
+		SB_Lerp,
+	};
+
+	enum EChromaSDKSceneMode
+	{
+		SM_Replace,
+		SM_Max,
+		SM_Min,
+		SM_Average,
+		SM_Multiply,
+		SM_Add,
+		SM_Subtract,
+	};
+
+	struct FChromaSDKSceneEffect
+	{
+	public:
+		std::string _mAnimation = "";
+		bool _mState = false;
+		int _mPrimaryColor = 0;
+		int _mSecondaryColor = 0;
+		int _mSpeed = 1;
+		EChromaSDKSceneBlend _mBlend = EChromaSDKSceneBlend::SB_None;
+		EChromaSDKSceneMode _mMode = EChromaSDKSceneMode::SM_Replace;
+
+		FChromaSDKDeviceFrameIndex _mFrameIndex;
+	};
+
+	struct FChromaSDKScene
+	{
+	public:
+		std::vector<FChromaSDKSceneEffect> _mEffects;
 	};
 }

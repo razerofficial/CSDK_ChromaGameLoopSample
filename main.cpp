@@ -52,42 +52,7 @@ int main();
 void SetKeyColor(int* colors, int rzkey, int color);
 void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue);
 
-class DeviceFrameIndex
-{
-public:
-	DeviceFrameIndex() {
-		_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_ChromaLink] = 0;
-		_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Headset] = 0;
-		_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Keyboard] = 0;
-		_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Keypad] = 0;
-		_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Mouse] = 0;
-		_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Mousepad] = 0;
-	}
-	// Index corresponds to EChromaSDKDeviceEnum;
-	int _mFrameIndex[6];
-};
-
-struct Effect
-{
-public:
-	string _mAnimation = "";
-	bool _mState = false;
-	int _mPrimaryColor = 0;
-	int _mSecondaryColor = 0;
-	int _mSpeed = 1;
-	string _mBlend = "";
-	string _mMode = "";
-
-	DeviceFrameIndex _mFrameIndex;
-};
-
-struct Scene
-{
-public:
-	vector<Effect> _mEffects;
-};
-
-static Scene _sScene;
+static FChromaSDKScene _sScene;
 
 void Init()
 {
@@ -376,7 +341,7 @@ int Thresh(int color1, int color2, int inputColor) {
 }
 
 
-void BlendAnimation1D(const Effect& effect, DeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice1DEnum device1d, const char* animationName,
+void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice1DEnum device1d, const char* animationName,
 	int* colors, int* tempColors)
 {
 	const int size = GetColorArraySize1D(device1d);
@@ -395,12 +360,12 @@ void BlendAnimation1D(const Effect& effect, DeviceFrameIndex& deviceFrameIndex, 
 
 			// BLEND
 			int color2;
-			if (effect._mBlend.compare("none") == 0)
+			switch (effect._mBlend)
 			{
+			case EChromaSDKSceneBlend::SB_None:
 				color2 = tempColor; //source
-			}
-			else if (effect._mBlend.compare("invert") == 0)
-			{
+				break;
+			case EChromaSDKSceneBlend::SB_Invert:
 				if (tempColor != 0) //source
 				{
 					color2 = InvertColor(tempColor); //source inverted
@@ -409,53 +374,50 @@ void BlendAnimation1D(const Effect& effect, DeviceFrameIndex& deviceFrameIndex, 
 				{
 					color2 = 0;
 				}
-			}
-			else if (effect._mBlend.compare("thresh") == 0)
-			{
+				break;
+			case EChromaSDKSceneBlend::SB_Threshold:
 				color2 = Thresh(effect._mPrimaryColor, effect._mSecondaryColor, tempColor); //source
-			}
-			else // if (effect._mBlend.compare("lerp") == 0) //default
-			{
+				break;
+			case EChromaSDKSceneBlend::SB_Lerp:
+			default:
 				color2 = MultiplyNonZeroTargetColorLerp(effect._mPrimaryColor, effect._mSecondaryColor, tempColor); //source
+				break;
 			}
 
 			// MODE
-			if (effect._mMode.compare("max") == 0)
+			switch (effect._mMode)
 			{
+			case EChromaSDKSceneMode::SM_Max:
 				colors[i] = MaxColor(color1, color2);
-			}
-			else if (effect._mMode.compare("min") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Min:
 				colors[i] = MinColor(color1, color2);
-			}
-			else if (effect._mMode.compare("average") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Average:
 				colors[i] = AverageColor(color1, color2);
-			}
-			else if (effect._mMode.compare("multiply") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Multiply:
 				colors[i] = MultiplyColor(color1, color2);
-			}
-			else if (effect._mMode.compare("add") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Add:
 				colors[i] = AddColor(color1, color2);
-			}
-			else if (effect._mMode.compare("subtract") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Subtract:
 				colors[i] = SubtractColor(color1, color2);
-			}
-			else // if (effect._mMode.compare("replace") == 0) //default
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Replace:
+			default:
 				if (color2 != 0) {
 					colors[i] = color2;
 				}
+				break;
 			}
 		}
 		deviceFrameIndex._mFrameIndex[device] = (frameId + frameCount + effect._mSpeed) % frameCount;
 	}
 }
 
-void BlendAnimation2D(const Effect& effect, DeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D, const char* animationName,
+void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D, const char* animationName,
 	int* colors, int* tempColors)
 {
 	const int size = GetColorArraySize2D(device2D);
@@ -474,12 +436,12 @@ void BlendAnimation2D(const Effect& effect, DeviceFrameIndex& deviceFrameIndex, 
 
 			// BLEND
 			int color2;
-			if (effect._mBlend.compare("none") == 0)
+			switch (effect._mBlend)
 			{
+			case EChromaSDKSceneBlend::SB_None:
 				color2 = tempColor; //source
-			}
-			else if (effect._mBlend.compare("invert") == 0)
-			{
+				break;
+			case EChromaSDKSceneBlend::SB_Invert:
 				if (tempColor != 0) //source
 				{
 					color2 = InvertColor(tempColor); //source inverted
@@ -488,53 +450,50 @@ void BlendAnimation2D(const Effect& effect, DeviceFrameIndex& deviceFrameIndex, 
 				{
 					color2 = 0;
 				}
-			}
-			else if (effect._mBlend.compare("thresh") == 0)
-			{
+				break;
+			case EChromaSDKSceneBlend::SB_Threshold:
 				color2 = Thresh(effect._mPrimaryColor, effect._mSecondaryColor, tempColor); //source
-			}
-			else // if (effect._mBlend.compare("lerp") == 0) //default
-			{
+				break;
+			case EChromaSDKSceneBlend::SB_Lerp:
+			default:
 				color2 = MultiplyNonZeroTargetColorLerp(effect._mPrimaryColor, effect._mSecondaryColor, tempColor); //source
+				break;
 			}
 
 			// MODE
-			if (effect._mMode.compare("max") == 0)
+			switch (effect._mMode)
 			{
+			case EChromaSDKSceneMode::SM_Max:
 				colors[i] = MaxColor(color1, color2);
-			}
-			else if (effect._mMode.compare("min") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Min:
 				colors[i] = MinColor(color1, color2);
-			}
-			else if (effect._mMode.compare("average") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Average:
 				colors[i] = AverageColor(color1, color2);
-			}
-			else if (effect._mMode.compare("multiply") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Multiply:
 				colors[i] = MultiplyColor(color1, color2);
-			}
-			else if (effect._mMode.compare("add") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Add:
 				colors[i] = AddColor(color1, color2);
-			}
-			else if (effect._mMode.compare("subtract") == 0)
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Subtract:
 				colors[i] = SubtractColor(color1, color2);
-			}
-			else // if (effect._mMode.compare("replace") == 0) //default
-			{
+				break;
+			case EChromaSDKSceneMode::SM_Replace:
+			default:
 				if (color2 != 0) {
 					colors[i] = color2;
 				}
+				break;
 			}
 		}
 		deviceFrameIndex._mFrameIndex[device] = (frameId + frameCount + effect._mSpeed) % frameCount;
 	}
 }
 
-void BlendAnimations(Scene& scene,
+void BlendAnimations(FChromaSDKScene& scene,
 	int* colorsChromaLink, int* tempColorsChromaLink,
 	int* colorsHeadset, int* tempColorsHeadset,
 	int* colorsKeyboard, int* tempColorsKeyboard,
@@ -543,13 +502,13 @@ void BlendAnimations(Scene& scene,
 	int* colorsMousepad, int* tempColorsMousepad)
 {
 	// blend active animations
-	vector<Effect>& effects = scene._mEffects;
-	for (vector<Effect>::iterator iter = effects.begin(); iter != effects.end(); ++iter)
+	vector<FChromaSDKSceneEffect>& effects = scene._mEffects;
+	for (vector<FChromaSDKSceneEffect>::iterator iter = effects.begin(); iter != effects.end(); ++iter)
 	{
-		Effect& effect = *iter;
+		FChromaSDKSceneEffect& effect = *iter;
 		if (effect._mState)
 		{
-			DeviceFrameIndex& deviceFrameIndex = effect._mFrameIndex;
+			FChromaSDKDeviceFrameIndex& deviceFrameIndex = effect._mFrameIndex;
 
 			//iterate all device types
 			for (int d = (int)EChromaSDKDeviceEnum::DE_ChromaLink; d < (int)EChromaSDKDeviceEnum::DE_MAX; ++d)
@@ -837,7 +796,7 @@ void HandleInput()
 			_sScene._mEffects[_sIndexSpiral]._mState = !_sScene._mEffects[_sIndexSpiral]._mState;
 			break;
 		}
-		Sleep(0);
+		Sleep(1);
 	}
 }
 
@@ -858,41 +817,41 @@ int main()
 	fprintf(stdout, "C++ GAME LOOP CHROMA SAMPLE APP\r\n\r\n");
 
 	// setup scene
-	_sScene = Scene();
+	_sScene = FChromaSDKScene();
 
-	Effect effect = Effect();
+	FChromaSDKSceneEffect effect = FChromaSDKSceneEffect();
 	effect._mAnimation = "Animations/Landscape";
 	effect._mSpeed = 1;
-	effect._mBlend = "none";
+	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
-	effect._mMode = "replace";
+	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
 	_sIndexLandscape = (int)_sScene._mEffects.size() - 1;
 
-	effect = Effect();
+	effect = FChromaSDKSceneEffect();
 	effect._mAnimation = "Animations/Fire";
 	effect._mSpeed = 1;
-	effect._mBlend = "none";
+	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
-	effect._mMode = "replace";
+	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
 	_sIndexFire = (int)_sScene._mEffects.size() - 1;
 
-	effect = Effect();
+	effect = FChromaSDKSceneEffect();
 	effect._mAnimation = "Animations/Rainbow";
 	effect._mSpeed = 1;
-	effect._mBlend = "none";
+	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
-	effect._mMode = "replace";
+	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
 	_sIndexRainbow = (int)_sScene._mEffects.size() - 1;
 
-	effect = Effect();
+	effect = FChromaSDKSceneEffect();
 	effect._mAnimation = "Animations/Spiral";
 	effect._mSpeed = 1;
-	effect._mBlend = "none";
+	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
-	effect._mMode = "replace";
+	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
 	_sIndexSpiral = (int)_sScene._mEffects.size() - 1;
 

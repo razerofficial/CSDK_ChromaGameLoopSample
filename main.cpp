@@ -558,7 +558,7 @@ void GameLoop()
 	int* tempColorsMouse = new int[sizeMouse];
 	int* tempColorsMousepad = new int[sizeMousepad];
 
-	int timeMS = 0;
+	unsigned int timeMS = 0;
 
 	while (_sWaitForExit)
 	{

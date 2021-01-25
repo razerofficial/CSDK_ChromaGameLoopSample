@@ -76,8 +76,9 @@ void Init()
 	//    0x08 | // Mousepads
 	//    0x10 | // Keypads
 	//    0x20   // ChromaLink devices
-	//    ;
 	appInfo.SupportedDevice = (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20);
+	//    0x01 | // Utility. (To specifiy this is an utility application)
+	//    0x02   // Game. (To specifiy this is a game);
 	appInfo.Category = 1;
 
 	RZRESULT result = ChromaAnimationAPI::InitSDK(&appInfo);
@@ -591,7 +592,7 @@ void GameLoop()
 
 		if (_sAmmo)
 		{
-			// SHow health animation
+			// Show health animation
 			{
 				int keys[] = {
 					Keyboard::RZKEY::RZKEY_F1,
@@ -606,7 +607,6 @@ void GameLoop()
 				float t = timeMS * 0.002f;
 				float hp = fabsf(cos(MATH_PI / 2.0f + t));
 				for (int i = 0; i < keysLength; ++i) {
-					float ratio = (i + 1) / (float)keysLength;
 					int color;
 					if (((i + 1) / ((float)keysLength + 1)) < hp) {
 						color = ChromaAnimationAPI::GetRGB(0, 255, 0);
@@ -634,7 +634,6 @@ void GameLoop()
 				float t = timeMS * 0.001f;
 				float hp = fabsf(cos(MATH_PI / 2.0f + t));
 				for (int i = 0; i < keysLength; ++i) {
-					float ratio = (i + 1) / (float)keysLength;
 					int color;
 					if (((i + 1) / ((float)keysLength + 1)) < hp) {
 						color = ChromaAnimationAPI::GetRGB(255, 255, 0);

@@ -747,12 +747,12 @@ void InputHandler()
 {
 	HandleInput inputLControl = HandleInput(VK_LCONTROL);
 	HandleInput inputEscape = HandleInput(VK_ESCAPE);
-	HandleInput inputA = HandleInput('a');
-	HandleInput inputH = HandleInput('h');
-	HandleInput inputL = HandleInput('l');
-	HandleInput inputF = HandleInput('f');
-	HandleInput inputR = HandleInput('r');
-	HandleInput inputS = HandleInput('s');
+	HandleInput inputA = HandleInput('A');
+	HandleInput inputH = HandleInput('H');
+	HandleInput inputL = HandleInput('L');
+	HandleInput inputF = HandleInput('F');
+	HandleInput inputR = HandleInput('R');
+	HandleInput inputS = HandleInput('S');
 
 	while (_sWaitForExit)
 	{

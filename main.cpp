@@ -752,7 +752,7 @@ void InputHandler()
 	HandleInput inputL = HandleInput('l');
 	HandleInput inputF = HandleInput('f');
 	HandleInput inputR = HandleInput('r');
-	HandleInput inputS = HandleInput('r');
+	HandleInput inputS = HandleInput('s');
 
 	while (_sWaitForExit)
 	{

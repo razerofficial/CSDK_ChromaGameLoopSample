@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HandleInput.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Razer\ChromaAnimationAPI.cpp" />
     <ClCompile Include="Razer\ChromaSDKPluginTypes.cpp" />
@@ -152,6 +153,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HandleInput.h" />
     <ClInclude Include="Razer\ChromaAnimationAPI.h" />
     <ClInclude Include="Razer\ChromaSDKPluginTypes.h" />
     <ClInclude Include="Razer\RzChromaSDKDefines.h" />

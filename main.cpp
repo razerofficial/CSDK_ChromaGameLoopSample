@@ -7,6 +7,7 @@
 #define USE_ARRAY_EFFECTS true
 
 #include "Razer\ChromaAnimationAPI.h"
+#include "HandleInput.h"
 #include <array>
 #include <chrono>
 #include <conio.h>
@@ -46,7 +47,7 @@ static int _sIndexSpiral = -1;
 void Cleanup();
 void GameLoop();
 int GetKeyColorIndex(int row, int column);
-void HandleInput();
+void InputHandler();
 void Init();
 int main();
 void SetKeyColor(int* colors, int rzkey, int color);
@@ -742,44 +743,52 @@ void GameLoop()
 	delete[] tempColorsMousepad;
 }
 
-void HandleInput()
+void InputHandler()
 {
+	HandleInput inputLControl = HandleInput(VK_LCONTROL);
+	HandleInput inputEscape = HandleInput(VK_ESCAPE);
+	HandleInput inputA = HandleInput('a');
+	HandleInput inputH = HandleInput('h');
+	HandleInput inputL = HandleInput('l');
+	HandleInput inputF = HandleInput('f');
+	HandleInput inputR = HandleInput('r');
+	HandleInput inputS = HandleInput('r');
+
 	while (_sWaitForExit)
 	{
-		int input = _getch();
-		switch (input)
+		if (inputLControl.WasReleased())
 		{
-		case 27: //ESCAPE
-			_sWaitForExit = false;
-			break;
-
-		case 'a':
-		case 'A':
-			_sAmmo = !_sAmmo;
-			break;
-
-		case 'h':
-		case 'H':
-			_sHotkeys = !_sHotkeys;
-			break;
-
-		case 'f':
-		case 'F':
-			_sScene._mEffects[_sIndexFire]._mState = !_sScene._mEffects[_sIndexFire]._mState;
-			break;
-		case 'l':
-		case 'L':
-			_sScene._mEffects[_sIndexLandscape]._mState = !_sScene._mEffects[_sIndexLandscape]._mState;
-			break;
-		case 'r':
-		case 'R':
-			_sScene._mEffects[_sIndexRainbow]._mState = !_sScene._mEffects[_sIndexRainbow]._mState;
-			break;
-		case 's':
-		case 'S':
-			_sScene._mEffects[_sIndexSpiral]._mState = !_sScene._mEffects[_sIndexSpiral]._mState;
-			break;
+			cout << "Left Control was pressed!" << endl;
 		}
+		if (inputEscape.WasReleased())
+		{
+			_sWaitForExit = false;
+		}
+		if (inputA.WasReleased())
+		{
+			_sAmmo = !_sAmmo;
+		}
+		if (inputH.WasReleased())
+		{
+			_sHotkeys = !_sHotkeys;
+		}
+		if (inputF.WasReleased())
+		{
+			_sScene._mEffects[_sIndexFire]._mState = !_sScene._mEffects[_sIndexFire]._mState;
+		}
+		if (inputL.WasReleased())
+		{
+			_sScene._mEffects[_sIndexLandscape]._mState = !_sScene._mEffects[_sIndexLandscape]._mState;
+		}
+		if (inputR.WasReleased())
+		{
+			_sScene._mEffects[_sIndexRainbow]._mState = !_sScene._mEffects[_sIndexRainbow]._mState;
+		}
+		if (inputS.WasReleased())
+		{
+			_sScene._mEffects[_sIndexSpiral]._mState = !_sScene._mEffects[_sIndexSpiral]._mState;
+		}
+
 		Sleep(1);
 	}
 }
@@ -850,7 +859,7 @@ int main()
 	cout << "Press `R` for rainbow." << endl;
 	cout << "Press `S` for spiral." << endl;
 
-	HandleInput();
+	InputHandler();
 
 	thread.join();
 	Cleanup();

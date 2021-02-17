@@ -811,7 +811,7 @@ int main()
 
 	thread thread(GameLoop);
 	cout << "Press `ESC` to Quit." << endl;
-	cout << "Press `C` to change base color" << endl;
+	cout << "Press `C` to change base color." << endl;
 	cout << "Press `A` for ammo/health." << endl;
 	cout << "Press `H` to toggle hotkeys." << endl;
 	cout << "Press `F` for fire." << endl;

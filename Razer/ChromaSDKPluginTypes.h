@@ -320,5 +320,6 @@ namespace ChromaSDK
 	{
 	public:
 		std::vector<FChromaSDKSceneEffect> _mEffects;
+		void ToggleState(int effect);
 	};
 }

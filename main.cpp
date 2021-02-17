@@ -38,6 +38,7 @@ const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
 static bool _sWaitForExit = true;
 static bool _sHotkeys = true;
 static bool _sAmmo = false;
+static int _sAmbientColor = 0;
 static int _sIndexLandscape = -1;
 static int _sIndexFire = -1;
 static int _sIndexRainbow = -1;
@@ -148,62 +149,11 @@ void SetupAnimation2D(const char* path, EChromaSDKDevice2DEnum device)
 }
 #endif
 
-void SetAmbientColor1D(EChromaSDKDevice1DEnum device, int* colors, int ambientColor)
+void SetStaticColor(int* colors, int color, int size)
 {
-	const int size = GetColorArraySize1D(device);
 	for (int i = 0; i < size; ++i)
 	{
-		if (colors[i] == 0)
-		{
-			colors[i] = ambientColor;
-		}
-	}
-}
-
-void SetAmbientColor2D(EChromaSDKDevice2DEnum device, int* colors, int ambientColor)
-{
-	const int size = GetColorArraySize2D(device);
-	for (int i = 0; i < size; ++i)
-	{
-		if (colors[i] == 0)
-		{
-			colors[i] = ambientColor;
-		}
-	}
-}
-
-void SetAmbientColor(int ambientColor,
-	int* colorsChromaLink,
-	int* colorsHeadset,
-	int* colorsKeyboard,
-	int* colorsKeypad,
-	int* colorsMouse,
-	int* colorsMousepad)
-{
-	// Set ambient color
-	for (int d = (int)EChromaSDKDeviceEnum::DE_ChromaLink; d < (int)EChromaSDKDeviceEnum::DE_MAX; ++d)
-	{
-		switch ((EChromaSDKDeviceEnum)d)
-		{
-		case EChromaSDKDeviceEnum::DE_ChromaLink:
-			SetAmbientColor1D(EChromaSDKDevice1DEnum::DE_ChromaLink, colorsChromaLink, ambientColor);
-			break;
-		case EChromaSDKDeviceEnum::DE_Headset:
-			SetAmbientColor1D(EChromaSDKDevice1DEnum::DE_Headset, colorsHeadset, ambientColor);
-			break;
-		case EChromaSDKDeviceEnum::DE_Keyboard:
-			SetAmbientColor2D(EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard, ambientColor);
-			break;
-		case EChromaSDKDeviceEnum::DE_Keypad:
-			SetAmbientColor2D(EChromaSDKDevice2DEnum::DE_Keypad, colorsKeypad, ambientColor);
-			break;
-		case EChromaSDKDeviceEnum::DE_Mouse:
-			SetAmbientColor2D(EChromaSDKDevice2DEnum::DE_Mouse, colorsMouse, ambientColor);
-			break;
-		case EChromaSDKDeviceEnum::DE_Mousepad:
-			SetAmbientColor1D(EChromaSDKDevice1DEnum::DE_Mousepad, colorsMousepad, ambientColor);
-			break;
-		}
+		colors[i] = color;
 	}
 }
 
@@ -565,12 +515,12 @@ void GameLoop()
 	while (_sWaitForExit)
 	{
 		// start with a blank frame
-		memset(colorsChromaLink, 0, sizeof(int) * sizeChromaLink);
-		memset(colorsHeadset, 0, sizeof(int) * sizeHeadset);
-		memset(colorsKeyboard, 0, sizeof(int) * sizeKeyboard);
-		memset(colorsKeypad, 0, sizeof(int) * sizeKeypad);
-		memset(colorsMouse, 0, sizeof(int) * sizeMouse);
-		memset(colorsMousepad, 0, sizeof(int) * sizeMousepad);
+		SetStaticColor(colorsChromaLink, _sAmbientColor, sizeChromaLink);
+		SetStaticColor(colorsHeadset, _sAmbientColor, sizeHeadset);
+		SetStaticColor(colorsKeyboard, _sAmbientColor, sizeKeyboard);
+		SetStaticColor(colorsKeypad, _sAmbientColor, sizeKeypad);
+		SetStaticColor(colorsMouse, _sAmbientColor, sizeMouse);
+		SetStaticColor(colorsMousepad, _sAmbientColor, sizeMousepad);
 		
 #if !USE_ARRAY_EFFECTS
 
@@ -748,6 +698,7 @@ void InputHandler()
 	HandleInput inputLControl = HandleInput(VK_LCONTROL);
 	HandleInput inputEscape = HandleInput(VK_ESCAPE);
 	HandleInput inputA = HandleInput('A');
+	HandleInput inputC = HandleInput('C');
 	HandleInput inputH = HandleInput('H');
 	HandleInput inputL = HandleInput('L');
 	HandleInput inputF = HandleInput('F');
@@ -772,21 +723,29 @@ void InputHandler()
 		{
 			_sHotkeys = !_sHotkeys;
 		}
+		if (inputC.WasReleased())
+		{
+			_sAmbientColor = ChromaAnimationAPI::GetRGB(rand() % 256, rand() % 256, rand() % 256);
+		}
 		if (inputF.WasReleased())
 		{
-			_sScene._mEffects[_sIndexFire]._mState = !_sScene._mEffects[_sIndexFire]._mState;
+			_sScene.ToggleState(_sIndexFire);
+			_sAmbientColor = 0;
 		}
 		if (inputL.WasReleased())
 		{
-			_sScene._mEffects[_sIndexLandscape]._mState = !_sScene._mEffects[_sIndexLandscape]._mState;
+			_sScene.ToggleState(_sIndexLandscape);
+			_sAmbientColor = 0;
 		}
 		if (inputR.WasReleased())
 		{
-			_sScene._mEffects[_sIndexRainbow]._mState = !_sScene._mEffects[_sIndexRainbow]._mState;
+			_sScene.ToggleState(_sIndexRainbow);
+			_sAmbientColor = 0;
 		}
 		if (inputS.WasReleased())
 		{
-			_sScene._mEffects[_sIndexSpiral]._mState = !_sScene._mEffects[_sIndexSpiral]._mState;
+			_sScene.ToggleState(_sIndexSpiral);
+			_sAmbientColor = 0;
 		}
 
 		Sleep(1);
@@ -852,9 +811,10 @@ int main()
 
 	thread thread(GameLoop);
 	cout << "Press `ESC` to Quit." << endl;
+	cout << "Press `C` to change base color" << endl;
 	cout << "Press `A` for ammo/health." << endl;
-	cout << "Press `F` for fire." << endl;
 	cout << "Press `H` to toggle hotkeys." << endl;
+	cout << "Press `F` for fire." << endl;
 	cout << "Press `L` for landscape." << endl;
 	cout << "Press `R` for rainbow." << endl;
 	cout << "Press `S` for spiral." << endl;

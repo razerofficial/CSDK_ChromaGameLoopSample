@@ -37,7 +37,7 @@ const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
 
 static bool _sWaitForExit = true;
 static bool _sHotkeys = true;
-static bool _sAmmo = false;
+static bool _sAmmo = true;
 static int _sAmbientColor = 0;
 static int _sIndexLandscape = -1;
 static int _sIndexFire = -1;
@@ -606,6 +606,10 @@ void GameLoop()
 			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
 			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
 			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_C, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_L, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_R, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_F, 255, 0, 0);
 
 			if (_sAmmo)
 			{
@@ -639,6 +643,7 @@ void GameLoop()
 			if (_sHotkeys)
 			{
 				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_H, 255, 0, 0);
 			}
 		}
 

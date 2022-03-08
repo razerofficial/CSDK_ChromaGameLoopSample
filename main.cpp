@@ -8,6 +8,7 @@
 
 #include "Razer\ChromaAnimationAPI.h"
 #include "HandleInput.h"
+#include "CpuUsage.h"
 #include <array>
 #include <chrono>
 #include <conio.h>
@@ -37,12 +38,24 @@ const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
 
 static bool _sWaitForExit = true;
 static bool _sHotkeys = true;
-static bool _sAmmo = false;
+static bool _sAmmo = true;
 static int _sAmbientColor = 0;
 static int _sIndexLandscape = -1;
 static int _sIndexFire = -1;
 static int _sIndexRainbow = -1;
 static int _sIndexSpiral = -1;
+
+static FChromaSDKScene _sScene;
+
+static char _sShortcode[7] = { 0 };
+static char _sStreamId[48] = { 0 };
+static char _sStreamKey[48] = { 0 };
+static unsigned char _sLenShortcode = 0;
+static unsigned char _sLenStreamId = 0;
+static unsigned char _sLenStreamKey = 0;
+
+static int _sSelection = 0;
+const int MAX_SELECTION = 7;
 
 // Function prototypes
 void Cleanup();
@@ -54,7 +67,72 @@ int main();
 void SetKeyColor(int* colors, int rzkey, int color);
 void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue);
 
-static FChromaSDKScene _sScene;
+const char* IsSelected(int index)
+{
+	return (index == _sSelection) ? "*" : " ";
+}
+
+CpuUsage _gUsage;
+
+void PrintLegend()
+{
+	for (int i = 0; i < 25; ++i)
+	{
+		fprintf(stdout, "\r\n");
+	}
+
+	fprintf(stdout, "C++ GAME LOOP SAMPLE APP\r\n");
+	fprintf(stdout, "\r\n");
+
+	cout << "Press `ESC` to Quit." << endl;
+	cout << "Press `C` to change base color." << endl;
+	cout << "Press `A` for ammo/health." << endl;
+	cout << "Press `H` to toggle hotkeys." << endl;
+	cout << "Press `F` for fire." << endl;
+	cout << "Press `L` for landscape." << endl;
+	cout << "Press `R` for rainbow." << endl;
+	cout << "Press `S` for spiral." << endl;
+	
+	short cpuUsage = _gUsage.GetUsage();
+	cout << "CPU usage: " << cpuUsage << "%" << endl;
+
+	fprintf(stdout, "Use UP and DOWN arrows to select item and press ENTER.\r\n");
+	fprintf(stdout, "Use ESCAPE to QUIT.\r\n");
+	fprintf(stdout, "\r\n");
+
+	if (ChromaAnimationAPI::CoreStreamSupportsStreaming())
+	{
+		fprintf(stdout, "Streaming Info (SUPPORTED):\r\n");
+		ChromaSDK::Stream::StreamStatusType status = ChromaAnimationAPI::CoreStreamGetStatus();
+		fprintf(stdout, "Status: %s\r\n", ChromaAnimationAPI::CoreStreamGetStatusString(status));
+		if (_sLenShortcode > 0)
+		{
+			fprintf(stdout, "Shortcode: %s\r\n", _sShortcode);
+		}
+		if (_sLenStreamId > 0)
+		{
+			fprintf(stdout, "StreamId: %s\r\n", _sStreamId);
+		}
+		if (_sLenStreamKey > 0)
+		{
+			fprintf(stdout, "StreamKey: %s\r\n", _sStreamKey);
+		}
+		fprintf(stdout, "\r\n");
+	}
+
+	int index = -1;
+	if (ChromaAnimationAPI::CoreStreamSupportsStreaming())
+	{
+		fprintf(stdout, "[%s] Request Shortcode\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] Request StreamId\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] Request StreamKey\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] Release Shortcode\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] Broadcast\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] BroadcastEnd\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] Watch\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] WatchEnd\r\n", IsSelected(++index));
+	}	
+}
 
 void Init()
 {
@@ -87,6 +165,7 @@ void Init()
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to initialize Chroma!" << endl;
+		ChromaAnimationAPI::UnloadLibrarySDK();
 		exit(1);
 	}
 	Sleep(100); //wait for init
@@ -695,8 +774,10 @@ void GameLoop()
 
 void InputHandler()
 {
-	HandleInput inputLControl = HandleInput(VK_LCONTROL);
 	HandleInput inputEscape = HandleInput(VK_ESCAPE);
+	HandleInput inputEnter = HandleInput(VK_RETURN);
+	HandleInput inputUp = HandleInput(VK_UP);
+	HandleInput inputDown = HandleInput(VK_DOWN);
 	HandleInput inputA = HandleInput('A');
 	HandleInput inputC = HandleInput('C');
 	HandleInput inputH = HandleInput('H');
@@ -705,45 +786,118 @@ void InputHandler()
 	HandleInput inputR = HandleInput('R');
 	HandleInput inputS = HandleInput('S');
 
+	bool inputDetected = true;
+
+	int autoPrint = 0;
 	while (_sWaitForExit)
 	{
-		if (inputLControl.WasReleased())
+		if (++autoPrint > 100 || inputDetected)
 		{
-			cout << "Left Control was pressed!" << endl;
+			autoPrint = 0;
+			PrintLegend();
 		}
+
+		inputDetected = false;
+
+		if (inputUp.WasReleased())
+		{
+			inputDetected = true;
+			if (_sSelection > 0)
+			{
+				--_sSelection;
+			}
+		}
+
+		if (inputDown.WasReleased())
+		{
+			inputDetected = true;
+			if (_sSelection < MAX_SELECTION)
+			{
+				++_sSelection;
+			}
+		}
+
+		if (inputEnter.WasReleased())
+		{
+			inputDetected = true;
+			if (ChromaAnimationAPI::CoreStreamSupportsStreaming())
+			{
+				switch (_sSelection)
+				{
+				case 0:
+					//ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, "PC", "Gameloop Sample App");
+					ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, "GEFORCE_NOW", "Gameloop Cloud Sample App");
+					break;
+				case 1:
+					ChromaAnimationAPI::CoreStreamGetId(_sShortcode, _sStreamId, &_sLenStreamId);
+					break;
+				case 2:
+					ChromaAnimationAPI::CoreStreamGetKey(_sShortcode, _sStreamKey, &_sLenStreamKey);
+					break;
+				case 3:
+					if (ChromaAnimationAPI::CoreStreamReleaseShortcode(_sShortcode))
+					{
+						memset(_sShortcode, 0, size(_sShortcode));
+						_sLenShortcode = 0;
+					}
+					break;
+				case 4:
+					ChromaAnimationAPI::CoreStreamBroadcast(_sStreamId, _sStreamKey);
+					break;
+				case 5:
+					ChromaAnimationAPI::CoreStreamBroadcastEnd();
+					break;
+				case 6:
+					ChromaAnimationAPI::CoreStreamWatch(_sStreamId, 0);
+					break;
+				case 7:
+					ChromaAnimationAPI::CoreStreamWatchEnd();
+					break;
+				}
+			}
+		}
+
 		if (inputEscape.WasReleased())
 		{
+			inputDetected = true;
 			_sWaitForExit = false;
 		}
 		if (inputA.WasReleased())
 		{
+			inputDetected = true;
 			_sAmmo = !_sAmmo;
 		}
 		if (inputH.WasReleased())
 		{
+			inputDetected = true;
 			_sHotkeys = !_sHotkeys;
 		}
 		if (inputC.WasReleased())
 		{
+			inputDetected = true;
 			_sAmbientColor = ChromaAnimationAPI::GetRGB(rand() % 256, rand() % 256, rand() % 256);
 		}
 		if (inputF.WasReleased())
 		{
+			inputDetected = true;
 			_sScene.ToggleState(_sIndexFire);
 			_sAmbientColor = 0;
 		}
 		if (inputL.WasReleased())
 		{
+			inputDetected = true;
 			_sScene.ToggleState(_sIndexLandscape);
 			_sAmbientColor = 0;
 		}
 		if (inputR.WasReleased())
 		{
+			inputDetected = true;
 			_sScene.ToggleState(_sIndexRainbow);
 			_sAmbientColor = 0;
 		}
 		if (inputS.WasReleased())
 		{
+			inputDetected = true;
 			_sScene.ToggleState(_sIndexSpiral);
 			_sAmbientColor = 0;
 		}
@@ -757,6 +911,7 @@ void Cleanup()
 	ChromaAnimationAPI::StopAll();
 	ChromaAnimationAPI::CloseAll();
 	RZRESULT result = ChromaAnimationAPI::Uninit();
+	ChromaAnimationAPI::UnloadLibrarySDK();
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to uninitialize Chroma!" << endl;
@@ -793,7 +948,7 @@ int main()
 	effect._mAnimation = "Animations/Rainbow";
 	effect._mSpeed = 1;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
-	effect._mState = false;
+	effect._mState = true;
 	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
 	_sIndexRainbow = (int)_sScene._mEffects.size() - 1;
@@ -810,14 +965,6 @@ int main()
 	Init();
 
 	thread thread(GameLoop);
-	cout << "Press `ESC` to Quit." << endl;
-	cout << "Press `C` to change base color." << endl;
-	cout << "Press `A` for ammo/health." << endl;
-	cout << "Press `H` to toggle hotkeys." << endl;
-	cout << "Press `F` for fire." << endl;
-	cout << "Press `L` for landscape." << endl;
-	cout << "Press `R` for rainbow." << endl;
-	cout << "Press `S` for spiral." << endl;
 
 	InputHandler();
 

@@ -12,7 +12,7 @@ FChromaSDKColorFrame2D::FChromaSDKColorFrame2D()
 	Duration = 1.0f;
 }
 
-void FChromaSDKScene::ToggleState(int effect)
+void FChromaSDKScene::ToggleState(unsigned int effect)
 {
 	if (effect >= 0 && effect < _mEffects.size())
 	{

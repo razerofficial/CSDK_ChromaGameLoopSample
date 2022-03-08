@@ -27,6 +27,12 @@
     <ClCompile Include="HandleInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Razer\ChromaLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CpuUsage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CChromaEditorLibrary64.dll" />
@@ -49,6 +55,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HandleInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Razer\ChromaLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CpuUsage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

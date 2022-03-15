@@ -1,4 +1,4 @@
-// CSDK_ChromaGameLoopSample.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿// CSDK_ChromaGameLoopSample.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 // When true, the sample will set Chroma effects directly from Arrays
@@ -825,8 +825,7 @@ void InputHandler()
 				switch (_sSelection)
 				{
 				case 0:
-					//ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, "PC", "Gameloop Sample App");
-					ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, "GEFORCE_NOW", "Gameloop Cloud Sample App");
+					ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, L"PC", L"Gameloop Sample App 好");
 					break;
 				case 1:
 					ChromaAnimationAPI::CoreStreamGetId(_sShortcode, _sStreamId, &_sLenStreamId);

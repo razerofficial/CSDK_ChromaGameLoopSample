@@ -825,7 +825,7 @@ void InputHandler()
 				switch (_sSelection)
 				{
 				case 0:
-					ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, L"PC", L"Gameloop Sample App 好");
+					ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, L"PC", L"C++ Game Loop Sample App 好");
 					break;
 				case 1:
 					ChromaAnimationAPI::CoreStreamGetId(_sShortcode, _sStreamId, &_sLenStreamId);

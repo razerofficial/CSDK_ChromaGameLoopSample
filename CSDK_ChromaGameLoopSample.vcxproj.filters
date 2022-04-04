@@ -37,6 +37,8 @@
   <ItemGroup>
     <None Include="CChromaEditorLibrary64.dll" />
     <None Include="CChromaEditorLibrary.dll" />
+    <None Include="CChromaEditorLibrary.pdb" />
+    <None Include="CChromaEditorLibrary64.pdb" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Razer\ChromaAnimationAPI.h">

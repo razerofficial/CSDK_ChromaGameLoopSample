@@ -74,7 +74,7 @@ const char* IsSelected(int index)
 
 CpuUsage _gUsage;
 
-void PrintLegend()
+void PrintLegend(bool supportsStreaming)
 {
 	for (int i = 0; i < 25; ++i)
 	{
@@ -100,7 +100,7 @@ void PrintLegend()
 	fprintf(stdout, "Use ESCAPE to QUIT.\r\n");
 	fprintf(stdout, "\r\n");
 
-	if (ChromaAnimationAPI::CoreStreamSupportsStreaming())
+	if (supportsStreaming)
 	{
 		fprintf(stdout, "Streaming Info (SUPPORTED):\r\n");
 		ChromaSDK::Stream::StreamStatusType status = ChromaAnimationAPI::CoreStreamGetStatus();
@@ -121,7 +121,7 @@ void PrintLegend()
 	}
 
 	int index = -1;
-	if (ChromaAnimationAPI::CoreStreamSupportsStreaming())
+	if (supportsStreaming)
 	{
 		fprintf(stdout, "[%s] Request Shortcode\r\n", IsSelected(++index));
 		fprintf(stdout, "[%s] Request StreamId\r\n", IsSelected(++index));
@@ -568,6 +568,8 @@ void BlendAnimations(FChromaSDKScene& scene,
 
 void GameLoop()
 {
+	bool supportsStreaming = ChromaAnimationAPI::CoreStreamSupportsStreaming();
+
 	const int sizeChromaLink = GetColorArraySize1D(EChromaSDKDevice1DEnum::DE_ChromaLink);
 	const int sizeHeadset = GetColorArraySize1D(EChromaSDKDevice1DEnum::DE_Headset);
 	const int sizeKeyboard = GetColorArraySize2D(EChromaSDKDevice2DEnum::DE_Keyboard);
@@ -774,6 +776,8 @@ void GameLoop()
 
 void InputHandler()
 {
+	bool supportsStreaming = ChromaAnimationAPI::CoreStreamSupportsStreaming();
+
 	HandleInput inputEscape = HandleInput(VK_ESCAPE);
 	HandleInput inputEnter = HandleInput(VK_RETURN);
 	HandleInput inputUp = HandleInput(VK_UP);
@@ -794,7 +798,7 @@ void InputHandler()
 		if (++autoPrint > 100 || inputDetected)
 		{
 			autoPrint = 0;
-			PrintLegend();
+			PrintLegend(supportsStreaming);
 		}
 
 		inputDetected = false;
@@ -820,7 +824,7 @@ void InputHandler()
 		if (inputEnter.WasReleased())
 		{
 			inputDetected = true;
-			if (ChromaAnimationAPI::CoreStreamSupportsStreaming())
+			if (supportsStreaming)
 			{
 				switch (_sSelection)
 				{

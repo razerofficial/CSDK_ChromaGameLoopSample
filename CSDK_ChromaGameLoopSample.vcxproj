@@ -150,9 +150,11 @@
     <None Include="CChromaEditorLibrary.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="CChromaEditorLibrary.pdb" />
     <None Include="CChromaEditorLibrary64.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="CChromaEditorLibrary64.pdb" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CpuUsage.h" />

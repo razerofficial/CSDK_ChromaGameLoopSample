@@ -33,6 +33,9 @@
     <ClCompile Include="CpuUsage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Razer\VerifyLibrarySignature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CChromaEditorLibrary64.dll" />
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CpuUsage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Razer\VerifyLibrarySignature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -165,7 +165,7 @@ void Init()
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to initialize Chroma!" << endl;
-		ChromaAnimationAPI::UnloadLibrarySDK();
+		ChromaAnimationAPI::UninitAPI();
 		exit(1);
 	}
 	Sleep(100); //wait for init
@@ -914,7 +914,7 @@ void Cleanup()
 	ChromaAnimationAPI::StopAll();
 	ChromaAnimationAPI::CloseAll();
 	RZRESULT result = ChromaAnimationAPI::Uninit();
-	ChromaAnimationAPI::UnloadLibrarySDK();
+	ChromaAnimationAPI::UninitAPI();
 	if (result != RZRESULT_SUCCESS)
 	{
 		cerr << "Failed to uninitialize Chroma!" << endl;

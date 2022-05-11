@@ -38,12 +38,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CChromaEditorLibrary64.dll" />
-    <None Include="CChromaEditorLibrary.dll" />
-    <None Include="CChromaEditorLibrary.pdb" />
-    <None Include="CChromaEditorLibrary64.pdb" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Razer\ChromaAnimationAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>

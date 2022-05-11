@@ -2,7 +2,7 @@
 
 * Note: Visit the [Chroma Animation Guide](https://chroma.razer.com/ChromaGuide/) to find the latest supported plugin for Chroma RGB.
 
-# C++ - Chroma Gameloop Sample App #
+# C++ - Chroma Game Loop Sample App #
 
 **Table of Contents**
 
@@ -10,17 +10,17 @@
 * [See Also](#see-also)
 * [About](#about)
 
-
 <a name="see-also"></a>
+
 ## See Also ##
 
 **Docs:**
 
-- [Chroma Animation Guide](http://chroma.razer.com/ChromaGuide/) - Visual examples of the Chroma Animation API methods
+* [Chroma Animation Guide](http://chroma.razer.com/ChromaGuide/) - Visual examples of the Chroma Animation API methods
 
 **Plugins:**
 
-- [CChromaEditor](https://github.com/RazerOfficial/CChromaEditor) - C++ native MFC library for playing and editing Chroma animations
+* [CChromaEditor](https://github.com/RazerOfficial/CChromaEditor) - C++ native MFC library for playing and editing Chroma animations
 
 ## Quick Start ##
 
@@ -34,9 +34,10 @@
 
 
 <a name="about"></a>
+
 ## About ##
 
-The `Chroma Gameloop Sample App` is a C++ sample project that dynamically sets colors in a game loop.
+The `Chroma Game Loop Sample App` is a C++ sample project that dynamically sets colors in a game loop.
 
 **Screenshot:**
 

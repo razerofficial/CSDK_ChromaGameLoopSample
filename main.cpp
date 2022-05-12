@@ -74,7 +74,7 @@ const char* IsSelected(int index)
 
 CpuUsage _gUsage;
 
-void PrintLegend(bool supportsStreaming)
+void PrintLegend(bool supportsStreaming, BYTE platform)
 {
 	for (int i = 0; i < 25; ++i)
 	{
@@ -84,6 +84,10 @@ void PrintLegend(bool supportsStreaming)
 	fprintf(stdout, "C++ GAME LOOP SAMPLE APP\r\n");
 	fprintf(stdout, "\r\n");
 
+	if (supportsStreaming)
+	{
+		fprintf(stdout, "Use `P` to switch streaming platforms. ");
+	}
 	cout << "Press `ESC` to Quit." << endl;
 	cout << "Press `C` to change base color." << endl;
 	cout << "Press `A` for ammo/health." << endl;
@@ -123,7 +127,23 @@ void PrintLegend(bool supportsStreaming)
 	int index = -1;
 	if (supportsStreaming)
 	{
-		fprintf(stdout, "[%s] Request Shortcode\r\n", IsSelected(++index));
+		fprintf(stdout, "[%s] Request Shortcode for Platform: ", IsSelected(++index));
+
+		switch (platform)
+		{
+		case 0:
+			fprintf(stdout, "Windows PC (PC)\r\n");
+			break;
+		case 1:
+			fprintf(stdout, "Windows Cloud (LUNA)\r\n");
+			break;
+		case 2:
+			fprintf(stdout, "Windows Cloud (GEFORCE NOW)\r\n");
+			break;
+		case 3:
+			fprintf(stdout, "Windows Cloud (GAME PASS)\r\n");
+			break;
+		}
 		fprintf(stdout, "[%s] Request StreamId\r\n", IsSelected(++index));
 		fprintf(stdout, "[%s] Request StreamKey\r\n", IsSelected(++index));
 		fprintf(stdout, "[%s] Release Shortcode\r\n", IsSelected(++index));
@@ -789,8 +809,11 @@ void InputHandler()
 	HandleInput inputF = HandleInput('F');
 	HandleInput inputR = HandleInput('R');
 	HandleInput inputS = HandleInput('S');
+	HandleInput inputPlatform = HandleInput('P');
 
 	bool inputDetected = true;
+
+	BYTE platform = 0;
 
 	int autoPrint = 0;
 	while (_sWaitForExit)
@@ -798,7 +821,7 @@ void InputHandler()
 		if (++autoPrint > 100 || inputDetected)
 		{
 			autoPrint = 0;
-			PrintLegend(supportsStreaming);
+			PrintLegend(supportsStreaming, platform);
 		}
 
 		inputDetected = false;
@@ -829,7 +852,25 @@ void InputHandler()
 				switch (_sSelection)
 				{
 				case 0:
-					ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, L"PC", L"C++ Game Loop Sample App 好");
+					{
+						wstring strPlatform = L"PC";
+						switch (platform)
+						{
+						case 0:
+							strPlatform = L"PC";
+							break;
+						case 1:
+							strPlatform = L"LUNA";
+							break;
+						case 2:
+							strPlatform = L"GEFORCE_NOW";
+							break;
+						case 3:
+							strPlatform = L"GAME_PASS";
+							break;
+						}
+						ChromaAnimationAPI::CoreStreamGetAuthShortcode(_sShortcode, &_sLenShortcode, strPlatform.c_str(), L"C++ Game Loop Sample App 好");
+					}
 					break;
 				case 1:
 					ChromaAnimationAPI::CoreStreamGetId(_sShortcode, _sStreamId, &_sLenStreamId);
@@ -864,6 +905,11 @@ void InputHandler()
 		{
 			inputDetected = true;
 			_sWaitForExit = false;
+		}
+		if (inputPlatform.WasReleased())
+		{
+			inputDetected = true;
+			platform = (platform + 1) % 4; //PC, AMAZON LUNA, MS GAME PASS, NVIDIA GFN
 		}
 		if (inputA.WasReleased())
 		{

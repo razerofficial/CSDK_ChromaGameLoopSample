@@ -198,9 +198,10 @@ int GetKeyColorIndex(int row, int column)
 
 void SetKeyColor(int* colors, int rzkey, int color)
 {
+	const int chromaFlag = 1 << 24;
 	int row = HIBYTE(rzkey);
 	int column = LOBYTE(rzkey);
-	colors[GetKeyColorIndex(row, column)] = color;
+	colors[GetKeyColorIndex(row, column)] = color | chromaFlag;
 }
 
 void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue)
@@ -600,6 +601,7 @@ void GameLoop()
 	int* colorsChromaLink = new int[sizeChromaLink];
 	int* colorsHeadset = new int[sizeHeadset];
 	int* colorsKeyboard = new int[sizeKeyboard];
+	int* keysKeyboard = new int[sizeKeyboard];
 	int* colorsKeypad = new int[sizeKeypad];
 	int* colorsMouse = new int[sizeMouse];
 	int* colorsMousepad = new int[sizeMousepad];
@@ -619,6 +621,7 @@ void GameLoop()
 		SetStaticColor(colorsChromaLink, _sAmbientColor, sizeChromaLink);
 		SetStaticColor(colorsHeadset, _sAmbientColor, sizeHeadset);
 		SetStaticColor(colorsKeyboard, _sAmbientColor, sizeKeyboard);
+		SetStaticColor(keysKeyboard, _sAmbientColor, sizeKeyboard);
 		SetStaticColor(colorsKeypad, _sAmbientColor, sizeKeypad);
 		SetStaticColor(colorsMouse, _sAmbientColor, sizeMouse);
 		SetStaticColor(colorsMousepad, _sAmbientColor, sizeMousepad);
@@ -628,6 +631,7 @@ void GameLoop()
 		SetupAnimation1D(ANIMATION_FINAL_CHROMA_LINK, EChromaSDKDevice1DEnum::DE_ChromaLink);
 		SetupAnimation1D(ANIMATION_FINAL_HEADSET, EChromaSDKDevice1DEnum::DE_Headset);
 		SetupAnimation2D(ANIMATION_FINAL_KEYBOARD, EChromaSDKDevice2DEnum::DE_Keyboard);
+		ChromaAnimationAPI::SetChromaCustomFlagName(ANIMATION_FINAL_KEYBOARD, true);
 		SetupAnimation2D(ANIMATION_FINAL_KEYPAD, EChromaSDKDevice2DEnum::DE_Keypad);
 		SetupAnimation2D(ANIMATION_FINAL_MOUSE, EChromaSDKDevice2DEnum::DE_Mouse);
 		SetupAnimation1D(ANIMATION_FINAL_MOUSEPAD, EChromaSDKDevice1DEnum::DE_Mousepad);
@@ -667,7 +671,7 @@ void GameLoop()
 						color = ChromaAnimationAPI::GetRGB(0, 100, 0);
 					}
 					int key = keys[i];
-					SetKeyColor(colorsKeyboard, key, color);
+					SetKeyColor(keysKeyboard, key, color);
 				}
 			}
 
@@ -694,7 +698,7 @@ void GameLoop()
 						color = ChromaAnimationAPI::GetRGB(100, 100, 0);
 					}
 					int key = keys[i];
-					SetKeyColor(colorsKeyboard, key, color);
+					SetKeyColor(keysKeyboard, key, color);
 				}
 			}
 		}
@@ -702,44 +706,44 @@ void GameLoop()
 		if (_sHotkeys)
 		{
 			// Show hotkeys
-			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
-			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
-			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
-			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
-			SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
+			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
+			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
+			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
+			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
+			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
 
 			if (_sAmmo)
 			{
-				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 0, 255, 0);
+				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 0, 255, 0);
 			}
 
 			// Highlight R if rainbow is active
 			if (_sScene._mEffects[_sIndexRainbow]._mState)
 			{
-				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
+				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
 			}
 
 			// Highlight S if spiral is active
 			if (_sScene._mEffects[_sIndexSpiral]._mState)
 			{
-				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
 			}
 
 			// Highlight L if landscape is active
 			if (_sScene._mEffects[_sIndexLandscape]._mState)
 			{
-				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
+				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
 			}
 
 			// Highlight L if landscape is active
 			if (_sScene._mEffects[_sIndexFire]._mState)
 			{
-				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_F, 0, 255, 0);
+				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_F, 0, 255, 0);
 			}
 
 			if (_sHotkeys)
 			{
-				SetKeyColorRGB(colorsKeyboard, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
+				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
 			}
 		}
 
@@ -749,20 +753,19 @@ void GameLoop()
 		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Headset, colorsHeadset);
 		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Mousepad, colorsMousepad);
 
-		ChromaAnimationAPI::SetCustomColorFlag2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard);
-		ChromaAnimationAPI::SetEffectKeyboardCustom2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard);
+		ChromaAnimationAPI::SetEffectKeyboardCustom2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard, keysKeyboard);
 
 		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Keypad, colorsKeypad);
 		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Mouse, colorsMouse);
 
 #else
 
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_CHROMA_LINK, 0, 0.1f, colorsChromaLink, sizeChromaLink);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_HEADSET, 0, 0.1f, colorsHeadset, sizeHeadset);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYBOARD, 0, 0.1f, colorsKeyboard, sizeKeyboard);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYPAD, 0, 0.1f, colorsKeypad, sizeKeypad);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSE, 0, 0.1f, colorsMouse, sizeMouse);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSEPAD, 0, 0.1f, colorsMousepad, sizeMousepad);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_CHROMA_LINK, 0, 0.1f, colorsChromaLink, sizeChromaLink, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_HEADSET, 0, 0.1f, colorsHeadset, sizeHeadset, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYBOARD, 0, 0.1f, colorsKeyboard, sizeKeyboard, keysKeyboard, sizeKeyboard);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYPAD, 0, 0.1f, colorsKeypad, sizeKeypad, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSE, 0, 0.1f, colorsMouse, sizeMouse, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSEPAD, 0, 0.1f, colorsMousepad, sizeMousepad, 0, 0);
 
 		// display the change
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_CHROMA_LINK, 0);

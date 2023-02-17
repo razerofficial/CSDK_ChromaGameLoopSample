@@ -6,7 +6,7 @@
 // using the first frame of the dynamic animation.
 #define USE_ARRAY_EFFECTS true
 
-#include "Razer\ChromaAnimationAPI.h"
+#include "Razer/ChromaAnimationAPI.h"
 #include "HandleInput.h"
 #include "CpuUsage.h"
 #include <array>
@@ -30,31 +30,33 @@ const float MATH_PI = 3.14159f;
 const char* ANIMATION_FINAL_CHROMA_LINK = "Dynamic\\Final_ChromaLink.chroma";
 const char* ANIMATION_FINAL_HEADSET = "Dynamic\\Final_Headset.chroma";
 const char* ANIMATION_FINAL_KEYBOARD = "Dynamic\\Final_Keyboard.chroma";
+const char* ANIMATION_FINAL_KEYBOARD_EXTENDED = "Dynamic\\Final_KeyboardExtended.chroma";
 const char* ANIMATION_FINAL_KEYPAD = "Dynamic\\Final_Keypad.chroma";
 const char* ANIMATION_FINAL_MOUSE = "Dynamic\\Final_Mouse.chroma";
 const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
 
 #endif
 
-static bool _sWaitForExit = true;
-static bool _sHotkeys = true;
-static bool _sAmmo = true;
-static int _sAmbientColor = 0;
-static int _sIndexLandscape = -1;
-static int _sIndexFire = -1;
-static int _sIndexRainbow = -1;
-static int _sIndexSpiral = -1;
+bool _sWaitForExit = true;
+bool _sHotkeys = true;
+bool _sAmmo = true;
+bool _sExtended = true;
+int _sAmbientColor = 0;
+int _sIndexGradient1 = -1;
+int _sIndexGradient2 = -1;
+int _sIndexGradient3 = -1;
+int _sIndexGradient4 = -1;
 
-static FChromaSDKScene _sScene;
+FChromaSDKScene _sScene;
 
-static char _sShortcode[7] = { 0 };
-static char _sStreamId[48] = { 0 };
-static char _sStreamKey[48] = { 0 };
-static unsigned char _sLenShortcode = 0;
-static unsigned char _sLenStreamId = 0;
-static unsigned char _sLenStreamKey = 0;
+char _sShortcode[7] = { 0 };
+char _sStreamId[48] = { 0 };
+char _sStreamKey[48] = { 0 };
+unsigned char _sLenShortcode = 0;
+unsigned char _sLenStreamId = 0;
+unsigned char _sLenStreamKey = 0;
 
-static int _sSelection = 0;
+int _sSelection = 0;
 const int MAX_SELECTION = 7;
 
 // Function prototypes
@@ -89,13 +91,14 @@ void PrintLegend(bool supportsStreaming, BYTE platform)
 		fprintf(stdout, "Use `P` to switch streaming platforms. ");
 	}
 	cout << "Press `ESC` to Quit." << endl;
+	cout << "Press `H` to toggle hotkeys [" << (_sHotkeys ? "ON" : "OFF") << "]" << endl;
+	cout << "Press `E` to toggle extended keyboard [" << (_sExtended ? "ON" : "OFF") << "]" << endl;
+	cout << "Press `A` for ammo/health [" << (_sAmmo? "ON" : "OFF") << "]" << endl;
+	cout << "Press `1` for gradient 1 [" << (_sScene.GetState(_sIndexGradient1) ? "ON" : "OFF") << "]" << endl;
+	cout << "Press `2` for gradient 2 [" << (_sScene.GetState(_sIndexGradient2) ? "ON" : "OFF") << "]" << endl;
+	cout << "Press `3` for gradient 3 [" << (_sScene.GetState(_sIndexGradient3) ? "ON" : "OFF") << "]" << endl;
+	cout << "Press `4` for gradient 4 [" << (_sScene.GetState(_sIndexGradient4) ? "ON" : "OFF") << "]" << endl;
 	cout << "Press `C` to change base color." << endl;
-	cout << "Press `A` for ammo/health." << endl;
-	cout << "Press `H` to toggle hotkeys." << endl;
-	cout << "Press `F` for fire." << endl;
-	cout << "Press `L` for landscape." << endl;
-	cout << "Press `R` for rainbow." << endl;
-	cout << "Press `S` for spiral." << endl;
 	
 	short cpuUsage = _gUsage.GetUsage();
 	cout << "CPU usage: " << cpuUsage << "%" << endl;
@@ -198,15 +201,25 @@ int GetKeyColorIndex(int row, int column)
 
 void SetKeyColor(int* colors, int rzkey, int color)
 {
-	const int chromaFlag = 1 << 24;
+	const int customFlag = 1 << 24;
 	int row = HIBYTE(rzkey);
 	int column = LOBYTE(rzkey);
-	colors[GetKeyColorIndex(row, column)] = color | chromaFlag;
+	colors[GetKeyColorIndex(row, column)] = color | customFlag;
+}
+
+void SetKeyColor(vector<int>& colors, int rzkey, int color)
+{
+	SetKeyColor(&colors[0], rzkey, color);
 }
 
 void SetKeyColorRGB(int* colors, int rzkey, int red, int green, int blue)
 {
 	SetKeyColor(colors, rzkey, ChromaAnimationAPI::GetRGB(red, green, blue));
+}
+
+void SetKeyColorRGB(vector<int>& colors, int rzkey, int red, int green, int blue)
+{
+	SetKeyColorRGB(&colors[0], rzkey, red, green, blue);
 }
 
 const int GetColorArraySize1D(EChromaSDKDevice1DEnum device)
@@ -232,7 +245,7 @@ void SetupAnimation1D(const char* path, EChromaSDKDevice1DEnum device)
 		animationId = ChromaAnimationAPI::CreateAnimationInMemory((int)EChromaSDKDeviceTypeEnum::DE_1D, (int)device);
 		ChromaAnimationAPI::CopyAnimation(animationId, path);
 		ChromaAnimationAPI::CloseAnimation(animationId);
-		ChromaAnimationAPI::MakeBlankFramesName(path, 1, 0.1f, 0);
+		ChromaAnimationAPI::MakeBlankFramesName(path, 1, 0.033f, 0);
 	}
 }
 
@@ -244,7 +257,7 @@ void SetupAnimation2D(const char* path, EChromaSDKDevice2DEnum device)
 		animationId = ChromaAnimationAPI::CreateAnimationInMemory((int)EChromaSDKDeviceTypeEnum::DE_2D, (int)device);
 		ChromaAnimationAPI::CopyAnimation(animationId, path);
 		ChromaAnimationAPI::CloseAnimation(animationId);
-		ChromaAnimationAPI::MakeBlankFramesName(path, 1, 0.1f, 0);
+		ChromaAnimationAPI::MakeBlankFramesName(path, 1, 0.033f, 0);
 	}
 }
 #endif
@@ -255,6 +268,38 @@ void SetStaticColor(int* colors, int color, int size)
 	{
 		colors[i] = color;
 	}
+}
+
+void SetStaticColor(vector<int>& colors, int color, int size)
+{
+	SetStaticColor(&colors[0], color, size);
+}
+
+void InvertColors(int* colors, int size)
+{
+	const int customFlag = 1 << 24;
+
+	for (int i = 0; i < size; ++i)
+	{
+		int color = colors[i];
+		int flag = color & customFlag;
+		int red = color & 0xFF;
+		int green = (color >> 8) & 0xFF;
+		int blue = (color >> 16) & 0xFF;
+
+		red = 255 - red;
+		green = 255 - green;
+		blue = 255 - blue;
+
+		color = ChromaAnimationAPI::GetRGB(red, green, blue);
+
+		colors[i] = flag | color;
+	}
+}
+
+void InvertColors(vector<int>& colors, int size)
+{
+	InvertColors(&colors[0], size);
 }
 
 int MultiplyColor(int color1, int color2) {
@@ -392,7 +437,7 @@ void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 		//cout << animationName << ": " << (1 + frameId) << " of " << frameCount << endl;
 		float duration;
 		int animationId = ChromaAnimationAPI::GetAnimation(animationName);
-		ChromaAnimationAPI::GetFrame(animationId, frameId, &duration, tempColors, size);
+		ChromaAnimationAPI::GetFrame(animationId, frameId, &duration, tempColors, size, 0, 0);
 		for (int i = 0; i < size; ++i)
 		{
 			int color1 = colors[i]; //target
@@ -455,6 +500,14 @@ void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 		}
 		deviceFrameIndex._mFrameIndex[device] = (frameId + frameCount + effect._mSpeed) % frameCount;
 	}
+}
+
+void BlendAnimation1D(const FChromaSDKSceneEffect& effect,
+	FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice1DEnum device1d,
+	const char* animationName,
+	vector<int>& colors, vector<int>& tempColors)
+{
+	BlendAnimation1D(effect, deviceFrameIndex, device, device1d, animationName, &colors[0], &tempColors[0]);
 }
 
 void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D, const char* animationName,
@@ -468,7 +521,7 @@ void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 		//cout << animationName << ": " << (1 + frameId) << " of " << frameCount << endl;
 		float duration;
 		int animationId = ChromaAnimationAPI::GetAnimation(animationName);
-		ChromaAnimationAPI::GetFrame(animationId, frameId, &duration, tempColors, size);
+		ChromaAnimationAPI::GetFrame(animationId, frameId, &duration, tempColors, size, 0, 0);
 		for (int i = 0; i < size; ++i)
 		{
 			int color1 = colors[i]; //target
@@ -533,10 +586,19 @@ void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 	}
 }
 
+void BlendAnimation2D(const FChromaSDKSceneEffect& effect,
+	FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D,
+	const char* animationName,
+	vector<int>& colors, vector<int>& tempColors)
+{
+	BlendAnimation2D(effect, deviceFrameIndex, device, device2D, animationName, &colors[0], &tempColors[0]);
+}
+
 void BlendAnimations(FChromaSDKScene& scene,
 	int* colorsChromaLink, int* tempColorsChromaLink,
 	int* colorsHeadset, int* tempColorsHeadset,
 	int* colorsKeyboard, int* tempColorsKeyboard,
+	int* colorsKeyboardExtended, int* tempColorsKeyboardExtended,
 	int* colorsKeypad, int* tempColorsKeypad,
 	int* colorsMouse, int* tempColorsMouse,
 	int* colorsMousepad, int* tempColorsMousepad)
@@ -569,6 +631,10 @@ void BlendAnimations(FChromaSDKScene& scene,
 					animationName += "_Keyboard.chroma";
 					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_Keyboard, animationName.c_str(), colorsKeyboard, tempColorsKeyboard);
 					break;
+				case EChromaSDKDeviceEnum::DE_KeyboardExtended:
+					animationName += "_KeyboardExtended.chroma";
+					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_KeyboardExtended, animationName.c_str(), colorsKeyboardExtended, tempColorsKeyboardExtended);
+					break;
 				case EChromaSDKDeviceEnum::DE_Keypad:
 					animationName += "_Keypad.chroma";
 					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_Keypad, animationName.c_str(), colorsKeypad, tempColorsKeypad);
@@ -587,6 +653,67 @@ void BlendAnimations(FChromaSDKScene& scene,
 	}
 }
 
+void BlendAnimations(FChromaSDKScene& scene,
+	vector<int>& colorsChromaLink, vector<int>& tempColorsChromaLink,
+	vector<int>& colorsHeadset, vector<int>& tempColorsHeadset,
+	vector<int>& colorsKeyboard, vector<int>& tempColorsKeyboard,
+	vector<int>& colorsKeyboardExtended, vector<int>& tempColorsKeyboardExtended,
+	vector<int>& colorsKeypad, vector<int>& tempColorsKeypad,
+	vector<int>& colorsMouse, vector<int>& tempColorsMouse,
+	vector<int>& colorsMousepad, vector<int>& tempColorsMousepad)
+{
+	BlendAnimations(scene,
+		&colorsChromaLink[0], &tempColorsChromaLink[0],
+		&colorsHeadset[0], &tempColorsHeadset[0],
+		&colorsKeyboard[0], &tempColorsKeyboard[0],
+		&colorsKeyboardExtended[0], &tempColorsKeyboardExtended[0],
+		&colorsKeypad[0], &tempColorsKeypad[0],
+		&colorsMouse[0], &tempColorsMouse[0],
+		&colorsMousepad[0], &tempColorsMousepad[0]);
+}
+
+int GetMaxRow(EChromaSDKDeviceEnum device)
+{
+	switch (device)
+	{
+	case EChromaSDKDeviceEnum::DE_Keyboard:
+		return ChromaAnimationAPI::GetMaxRow((int)EChromaSDKDevice2DEnum::DE_Keyboard);
+	case EChromaSDKDeviceEnum::DE_KeyboardExtended:
+		return ChromaAnimationAPI::GetMaxRow((int)EChromaSDKDevice2DEnum::DE_KeyboardExtended);
+	case EChromaSDKDeviceEnum::DE_Keypad:
+		return ChromaAnimationAPI::GetMaxRow((int)EChromaSDKDevice2DEnum::DE_Keypad);
+	case EChromaSDKDeviceEnum::DE_Mouse:
+		return ChromaAnimationAPI::GetMaxRow((int)EChromaSDKDevice2DEnum::DE_Mouse);
+	default:
+		return 0;
+	}
+}
+
+int GetMaxColumn(EChromaSDKDeviceEnum device)
+{
+	switch (device)
+	{
+	case EChromaSDKDeviceEnum::DE_Keyboard:
+		return ChromaAnimationAPI::GetMaxColumn((int)EChromaSDKDevice2DEnum::DE_Keyboard);
+	case EChromaSDKDeviceEnum::DE_KeyboardExtended:
+		return ChromaAnimationAPI::GetMaxColumn((int)EChromaSDKDevice2DEnum::DE_KeyboardExtended);
+	case EChromaSDKDeviceEnum::DE_Keypad:
+		return ChromaAnimationAPI::GetMaxColumn((int)EChromaSDKDevice2DEnum::DE_Keypad);
+	case EChromaSDKDeviceEnum::DE_Mouse:
+		return ChromaAnimationAPI::GetMaxColumn((int)EChromaSDKDevice2DEnum::DE_Mouse);
+	default:
+		return 0;
+	}
+}
+
+void AddZeroElementsToVector(vector<int>& vec, const int length)
+{
+	for (int index = 0; index < length; ++index)
+	{
+		vec.push_back(0);
+	}
+}
+
 void GameLoop()
 {
 	bool supportsStreaming = ChromaAnimationAPI::CoreStreamSupportsStreaming();
@@ -594,24 +721,44 @@ void GameLoop()
 	const int sizeChromaLink = GetColorArraySize1D(EChromaSDKDevice1DEnum::DE_ChromaLink);
 	const int sizeHeadset = GetColorArraySize1D(EChromaSDKDevice1DEnum::DE_Headset);
 	const int sizeKeyboard = GetColorArraySize2D(EChromaSDKDevice2DEnum::DE_Keyboard);
+	const int sizeKeyboardExtended = GetColorArraySize2D(EChromaSDKDevice2DEnum::DE_KeyboardExtended);
 	const int sizeKeypad = GetColorArraySize2D(EChromaSDKDevice2DEnum::DE_Keypad);
 	const int sizeMouse = GetColorArraySize2D(EChromaSDKDevice2DEnum::DE_Mouse);
 	const int sizeMousepad = GetColorArraySize1D(EChromaSDKDevice1DEnum::DE_Mousepad);
 
-	int* colorsChromaLink = new int[sizeChromaLink];
-	int* colorsHeadset = new int[sizeHeadset];
-	int* colorsKeyboard = new int[sizeKeyboard];
-	int* keysKeyboard = new int[sizeKeyboard];
-	int* colorsKeypad = new int[sizeKeypad];
-	int* colorsMouse = new int[sizeMouse];
-	int* colorsMousepad = new int[sizeMousepad];
+	vector<int> colorsChromaLink;
+	vector<int> colorsHeadset;
+	vector<int> colorsKeyboard;
+	vector<int> colorsKeyboardExtended;
+	vector<int> colorsKeyboardKeys;
+	vector<int> colorsKeypad;
+	vector<int> colorsMouse;
+	vector<int> colorsMousepad;
 
-	int* tempColorsChromaLink = new int[sizeChromaLink];
-	int* tempColorsHeadset = new int[sizeHeadset];
-	int* tempColorsKeyboard = new int[sizeKeyboard];
-	int* tempColorsKeypad = new int[sizeKeypad];
-	int* tempColorsMouse = new int[sizeMouse];
-	int* tempColorsMousepad = new int[sizeMousepad];
+	AddZeroElementsToVector(colorsChromaLink, sizeChromaLink);
+	AddZeroElementsToVector(colorsHeadset, sizeHeadset);
+	AddZeroElementsToVector(colorsKeyboard, sizeKeyboard);
+	AddZeroElementsToVector(colorsKeyboardExtended, sizeKeyboardExtended);
+	AddZeroElementsToVector(colorsKeyboardKeys, sizeKeyboard);
+	AddZeroElementsToVector(colorsKeypad, sizeKeypad);
+	AddZeroElementsToVector(colorsMouse, sizeMouse);
+	AddZeroElementsToVector(colorsMousepad, sizeMousepad);
+	
+	vector<int> tempColorsChromaLink;
+	vector<int> tempColorsHeadset;
+	vector<int> tempColorsKeyboard;
+	vector<int> tempColorsKeyboardExtended;
+	vector<int> tempColorsKeypad;
+	vector<int> tempColorsMouse;
+	vector<int> tempColorsMousepad;
+
+	AddZeroElementsToVector(tempColorsChromaLink, sizeChromaLink);
+	AddZeroElementsToVector(tempColorsHeadset, sizeHeadset);
+	AddZeroElementsToVector(tempColorsKeyboard, sizeKeyboard);	
+	AddZeroElementsToVector(tempColorsKeyboardExtended, sizeKeyboardExtended);
+	AddZeroElementsToVector(tempColorsKeypad, sizeKeypad);
+	AddZeroElementsToVector(tempColorsMouse, sizeMouse);
+	AddZeroElementsToVector(tempColorsMousepad, sizeMousepad);
 
 	unsigned int timeMS = 0;
 
@@ -620,8 +767,15 @@ void GameLoop()
 		// start with a blank frame
 		SetStaticColor(colorsChromaLink, _sAmbientColor, sizeChromaLink);
 		SetStaticColor(colorsHeadset, _sAmbientColor, sizeHeadset);
-		SetStaticColor(colorsKeyboard, _sAmbientColor, sizeKeyboard);
-		SetStaticColor(keysKeyboard, _sAmbientColor, sizeKeyboard);
+		if (_sExtended)
+		{
+			SetStaticColor(colorsKeyboardExtended, _sAmbientColor, sizeKeyboardExtended);
+		}
+		else
+		{
+			SetStaticColor(colorsKeyboard, _sAmbientColor, sizeKeyboard);
+		}
+		SetStaticColor(colorsKeyboardKeys, _sAmbientColor, sizeKeyboard);
 		SetStaticColor(colorsKeypad, _sAmbientColor, sizeKeypad);
 		SetStaticColor(colorsMouse, _sAmbientColor, sizeMouse);
 		SetStaticColor(colorsMousepad, _sAmbientColor, sizeMousepad);
@@ -630,8 +784,13 @@ void GameLoop()
 
 		SetupAnimation1D(ANIMATION_FINAL_CHROMA_LINK, EChromaSDKDevice1DEnum::DE_ChromaLink);
 		SetupAnimation1D(ANIMATION_FINAL_HEADSET, EChromaSDKDevice1DEnum::DE_Headset);
+		
 		SetupAnimation2D(ANIMATION_FINAL_KEYBOARD, EChromaSDKDevice2DEnum::DE_Keyboard);
 		ChromaAnimationAPI::SetChromaCustomFlagName(ANIMATION_FINAL_KEYBOARD, true);
+
+		SetupAnimation2D(ANIMATION_FINAL_KEYBOARD_EXTENDED, EChromaSDKDevice2DEnum::DE_KeyboardExtended);
+		ChromaAnimationAPI::SetChromaCustomFlagName(ANIMATION_FINAL_KEYBOARD_EXTENDED, true);
+
 		SetupAnimation2D(ANIMATION_FINAL_KEYPAD, EChromaSDKDevice2DEnum::DE_Keypad);
 		SetupAnimation2D(ANIMATION_FINAL_MOUSE, EChromaSDKDevice2DEnum::DE_Mouse);
 		SetupAnimation1D(ANIMATION_FINAL_MOUSEPAD, EChromaSDKDevice1DEnum::DE_Mousepad);
@@ -642,6 +801,7 @@ void GameLoop()
 			colorsChromaLink, tempColorsChromaLink,
 			colorsHeadset, tempColorsHeadset,
 			colorsKeyboard, tempColorsKeyboard,
+			colorsKeyboardExtended, tempColorsKeyboardExtended,
 			colorsKeypad, tempColorsKeypad,
 			colorsMouse, tempColorsMouse,
 			colorsMousepad, tempColorsMousepad);
@@ -671,7 +831,7 @@ void GameLoop()
 						color = ChromaAnimationAPI::GetRGB(0, 100, 0);
 					}
 					int key = keys[i];
-					SetKeyColor(keysKeyboard, key, color);
+					SetKeyColor(colorsKeyboardKeys, key, color);
 				}
 			}
 
@@ -698,79 +858,112 @@ void GameLoop()
 						color = ChromaAnimationAPI::GetRGB(100, 100, 0);
 					}
 					int key = keys[i];
-					SetKeyColor(keysKeyboard, key, color);
+					SetKeyColor(colorsKeyboardKeys, key, color);
 				}
 			}
 		}
 
 		if (_sHotkeys)
 		{
+			// Highlight if active
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
+
 			// Show hotkeys
-			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
-			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_W, 255, 0, 0);
-			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
-			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 255, 0, 0);
-			SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_D, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_ESC, 255, 255, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_A, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_C, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_E, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_1, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_2, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_3, 255, 0, 0);
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_4, 255, 0, 0);
 
 			if (_sAmmo)
 			{
-				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_A, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_A, 0, 255, 0);
 			}
 
-			// Highlight R if rainbow is active
-			if (_sScene._mEffects[_sIndexRainbow]._mState)
+			if (_sExtended)
 			{
-				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_R, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_E, 0, 255, 0);
 			}
 
-			// Highlight S if spiral is active
-			if (_sScene._mEffects[_sIndexSpiral]._mState)
+			// Highlight if active
+			if (_sScene._mEffects[_sIndexGradient1]._mState)
 			{
-				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_S, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_1, 0, 255, 0);
 			}
 
-			// Highlight L if landscape is active
-			if (_sScene._mEffects[_sIndexLandscape]._mState)
+			// Highlight if active
+			if (_sScene._mEffects[_sIndexGradient2]._mState)
 			{
-				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_L, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_2, 0, 255, 0);
 			}
 
-			// Highlight L if landscape is active
-			if (_sScene._mEffects[_sIndexFire]._mState)
+			// Highlight if active
+			if (_sScene._mEffects[_sIndexGradient3]._mState)
 			{
-				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_F, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_3, 0, 255, 0);
 			}
 
-			if (_sHotkeys)
+			// Highlight if active
+			if (_sScene._mEffects[_sIndexGradient4]._mState)
 			{
-				SetKeyColorRGB(keysKeyboard, (int)Keyboard::RZKEY::RZKEY_H, 0, 255, 0);
+				SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_4, 0, 255, 0);
 			}
+			}
+		else
+		{
+			SetKeyColorRGB(colorsKeyboardKeys, (int)Keyboard::RZKEY::RZKEY_H, 255, 0, 0);
 		}
 
 #if USE_ARRAY_EFFECTS
 
-		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_ChromaLink, colorsChromaLink);
-		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Headset, colorsHeadset);
-		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Mousepad, colorsMousepad);
+		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_ChromaLink, &colorsChromaLink[0]);
+		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Headset, &colorsHeadset[0]);
+		ChromaAnimationAPI::SetEffectCustom1D((int)EChromaSDKDevice1DEnum::DE_Mousepad, &colorsMousepad[0]);
 
-		ChromaAnimationAPI::SetEffectKeyboardCustom2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, colorsKeyboard, keysKeyboard);
+		if (_sExtended)
+		{
+			ChromaAnimationAPI::SetCustomColorFlag2D((int)EChromaSDKDevice2DEnum::DE_KeyboardExtended, &colorsKeyboardExtended[0]);
+			ChromaAnimationAPI::SetEffectKeyboardCustom2D((int)EChromaSDKDevice2DEnum::DE_KeyboardExtended, &colorsKeyboardExtended[0], &colorsKeyboardKeys[0]);
+		}
+		else
+		{
+			ChromaAnimationAPI::SetCustomColorFlag2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, &colorsKeyboard[0]);
+			ChromaAnimationAPI::SetEffectKeyboardCustom2D((int)EChromaSDKDevice2DEnum::DE_Keyboard, &colorsKeyboard[0], &colorsKeyboardKeys[0]);
+		}
 
-		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Keypad, colorsKeypad);
-		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Mouse, colorsMouse);
+		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Keypad, &colorsKeypad[0]);
+		ChromaAnimationAPI::SetEffectCustom2D((int)EChromaSDKDevice2DEnum::DE_Mouse, &colorsMouse[0]);
 
 #else
 
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_CHROMA_LINK, 0, 0.1f, colorsChromaLink, sizeChromaLink, 0, 0);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_HEADSET, 0, 0.1f, colorsHeadset, sizeHeadset, 0, 0);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYBOARD, 0, 0.1f, colorsKeyboard, sizeKeyboard, keysKeyboard, sizeKeyboard);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYPAD, 0, 0.1f, colorsKeypad, sizeKeypad, 0, 0);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSE, 0, 0.1f, colorsMouse, sizeMouse, 0, 0);
-		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSEPAD, 0, 0.1f, colorsMousepad, sizeMousepad, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_CHROMA_LINK, 0, 0.033f, &colorsChromaLink[0], sizeChromaLink, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_HEADSET, 0, 0.033f, &colorsHeadset[0], sizeHeadset, 0, 0);
+		if (_sExtended)
+		{
+			ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYBOARD_EXTENDED, 0, 0.033f, &colorsKeyboardExtended[0], sizeKeyboardExtended, &colorsKeyboardKeys[0], sizeKeyboard);
+		}
+		else
+		{
+			ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYBOARD, 0, 0.033f, &colorsKeyboard[0], sizeKeyboard, &colorsKeyboardKeys[0], sizeKeyboard);
+		}
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_KEYPAD, 0, 0.033f, &colorsKeypad[0], sizeKeypad, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSE, 0, 0.033f, &colorsMouse[0], sizeMouse, 0, 0);
+		ChromaAnimationAPI::UpdateFrameName(ANIMATION_FINAL_MOUSEPAD, 0, 0.033f, &colorsMousepad[0], sizeMousepad, 0, 0);
 
 		// display the change
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_CHROMA_LINK, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_HEADSET, 0);
-		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_KEYBOARD, 0);
+		if (_sExtended)
+		{
+			ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_KEYBOARD_EXTENDED, 0);
+		}
+		else
+		{
+			ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_KEYBOARD, 0);
+		}		
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_KEYPAD, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_MOUSE, 0);
 		ChromaAnimationAPI::PreviewFrameName(ANIMATION_FINAL_MOUSEPAD, 0);
@@ -782,19 +975,7 @@ void GameLoop()
 		timeMS += 33;
 	}
 	
-	delete[] colorsChromaLink;
-	delete[] colorsHeadset;
-	delete[] colorsKeyboard;
-	delete[] colorsKeypad;
-	delete[] colorsMouse;
-	delete[] colorsMousepad;
-
-	delete[] tempColorsChromaLink;
-	delete[] tempColorsHeadset;
-	delete[] tempColorsKeyboard;
-	delete[] tempColorsKeypad;
-	delete[] tempColorsMouse;
-	delete[] tempColorsMousepad;
+	Sleep(100);
 }
 
 void InputHandler()
@@ -807,11 +988,12 @@ void InputHandler()
 	HandleInput inputDown = HandleInput(VK_DOWN);
 	HandleInput inputA = HandleInput('A');
 	HandleInput inputC = HandleInput('C');
+	HandleInput inputE = HandleInput('E');
 	HandleInput inputH = HandleInput('H');
-	HandleInput inputL = HandleInput('L');
-	HandleInput inputF = HandleInput('F');
-	HandleInput inputR = HandleInput('R');
-	HandleInput inputS = HandleInput('S');
+	HandleInput input1 = HandleInput('1');
+	HandleInput input2 = HandleInput('2');
+	HandleInput input3 = HandleInput('3');
+	HandleInput input4 = HandleInput('4');
 	HandleInput inputPlatform = HandleInput('P');
 
 	bool inputDetected = true;
@@ -829,7 +1011,7 @@ void InputHandler()
 
 		inputDetected = false;
 
-		if (inputUp.WasReleased())
+		if (inputUp.WasReleased(true))
 		{
 			inputDetected = true;
 			if (_sSelection > 0)
@@ -838,7 +1020,7 @@ void InputHandler()
 			}
 		}
 
-		if (inputDown.WasReleased())
+		if (inputDown.WasReleased(true))
 		{
 			inputDetected = true;
 			if (_sSelection < MAX_SELECTION)
@@ -847,7 +1029,7 @@ void InputHandler()
 			}
 		}
 
-		if (inputEnter.WasReleased())
+		if (inputEnter.WasReleased(true))
 		{
 			inputDetected = true;
 			if (supportsStreaming)
@@ -904,53 +1086,58 @@ void InputHandler()
 			}
 		}
 
-		if (inputEscape.WasReleased())
+		if (inputEscape.WasReleased(true))
 		{
 			inputDetected = true;
 			_sWaitForExit = false;
 		}
-		if (inputPlatform.WasReleased())
+		if (inputPlatform.WasReleased(true))
 		{
 			inputDetected = true;
 			platform = (platform + 1) % 4; //PC, AMAZON LUNA, MS GAME PASS, NVIDIA GFN
 		}
-		if (inputA.WasReleased())
+		if (inputA.WasReleased(true))
 		{
 			inputDetected = true;
 			_sAmmo = !_sAmmo;
 		}
-		if (inputH.WasReleased())
+		if (inputE.WasReleased(true))
+		{
+			inputDetected = true;
+			_sExtended = !_sExtended;
+		}
+		if (inputH.WasReleased(true))
 		{
 			inputDetected = true;
 			_sHotkeys = !_sHotkeys;
 		}
-		if (inputC.WasReleased())
+		if (inputC.WasReleased(true))
 		{
 			inputDetected = true;
 			_sAmbientColor = ChromaAnimationAPI::GetRGB(rand() % 256, rand() % 256, rand() % 256);
 		}
-		if (inputF.WasReleased())
+		if (input1.WasReleased(true))
 		{
 			inputDetected = true;
-			_sScene.ToggleState(_sIndexFire);
+			_sScene.ToggleState(_sIndexGradient1);
 			_sAmbientColor = 0;
 		}
-		if (inputL.WasReleased())
+		if (input2.WasReleased(true))
 		{
 			inputDetected = true;
-			_sScene.ToggleState(_sIndexLandscape);
+			_sScene.ToggleState(_sIndexGradient2);
 			_sAmbientColor = 0;
 		}
-		if (inputR.WasReleased())
+		if (input3.WasReleased(true))
 		{
 			inputDetected = true;
-			_sScene.ToggleState(_sIndexRainbow);
+			_sScene.ToggleState(_sIndexGradient3);
 			_sAmbientColor = 0;
 		}
-		if (inputS.WasReleased())
+		if (input4.WasReleased(true))
 		{
 			inputDetected = true;
-			_sScene.ToggleState(_sIndexSpiral);
+			_sScene.ToggleState(_sIndexGradient4);
 			_sAmbientColor = 0;
 		}
 
@@ -979,46 +1166,65 @@ void Cleanup()
 
 int main()
 {
-	fprintf(stdout, "C++ GAME LOOP CHROMA SAMPLE APP\r\n\r\n");
+	fprintf(stdout, "C++ CHROMA GAME LOOP SAMPLE APP\r\n\r\n");
+
+	wchar_t filename[MAX_PATH]; //this is a char buffer
+	GetModuleFileNameW(NULL, filename, sizeof(filename));
+
+	std::wstring wpath;
+	const size_t last_slash_idx = std::wstring(filename).rfind('\\');
+	if (std::string::npos != last_slash_idx)
+	{
+		wpath = std::wstring(filename).substr(0, last_slash_idx);
+	}
+
+	//wprintf(L"Current Path: %s\r\n\r\n", wpath.c_str());
+	//Sleep(3000);
+
+	string cpath(wpath.begin(), wpath.end());
 
 	// setup scene
 	_sScene = FChromaSDKScene();
 
-	FChromaSDKSceneEffect effect = FChromaSDKSceneEffect();
-	effect._mAnimation = "Animations/Landscape";
-	effect._mSpeed = 1;
-	effect._mBlend = EChromaSDKSceneBlend::SB_None;
-	effect._mState = false;
-	effect._mMode = EChromaSDKSceneMode::SM_Add;
-	_sScene._mEffects.push_back(effect);
-	_sIndexLandscape = (int)_sScene._mEffects.size() - 1;
+	FChromaSDKSceneEffect effect;
+
+	const int SPEED_MULTIPLIER = 3;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = "Animations/Fire";
-	effect._mSpeed = 1;
-	effect._mBlend = EChromaSDKSceneBlend::SB_None;
-	effect._mState = false;
-	effect._mMode = EChromaSDKSceneMode::SM_Add;
-	_sScene._mEffects.push_back(effect);
-	_sIndexFire = (int)_sScene._mEffects.size() - 1;
-
-	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = "Animations/Rainbow";
-	effect._mSpeed = 1;
+	effect._mAnimation = cpath + "\\Animations\\Gradient1";
+	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = true;
 	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
-	_sIndexRainbow = (int)_sScene._mEffects.size() - 1;
+	_sIndexGradient1 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = "Animations/Spiral";
-	effect._mSpeed = 1;
+	effect._mAnimation = cpath + "\\Animations\\Gradient2";
+	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
 	effect._mMode = EChromaSDKSceneMode::SM_Add;
 	_sScene._mEffects.push_back(effect);
-	_sIndexSpiral = (int)_sScene._mEffects.size() - 1;
+	_sIndexGradient2 = (int)_sScene._mEffects.size() - 1;
+
+	effect = FChromaSDKSceneEffect();
+	effect._mAnimation = cpath + "\\Animations\\Gradient3";
+	effect._mSpeed = SPEED_MULTIPLIER;
+	effect._mBlend = EChromaSDKSceneBlend::SB_None;
+	effect._mState = false;
+	effect._mMode = EChromaSDKSceneMode::SM_Add;
+	_sScene._mEffects.push_back(effect);
+	_sIndexGradient3 = (int)_sScene._mEffects.size() - 1;
+
+	effect = FChromaSDKSceneEffect();
+	effect._mAnimation = cpath + "\\Animations\\Gradient4";
+	effect._mSpeed = SPEED_MULTIPLIER;
+	effect._mBlend = EChromaSDKSceneBlend::SB_None;
+	effect._mState = false;
+	effect._mMode = EChromaSDKSceneMode::SM_Add;
+	_sScene._mEffects.push_back(effect);
+	_sIndexGradient4 = (int)_sScene._mEffects.size() - 1;
 
 	Init();
 

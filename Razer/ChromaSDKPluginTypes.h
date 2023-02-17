@@ -44,6 +44,7 @@ namespace ChromaSDK
 		DE_Keyboard = 0,
 		DE_Keypad,
 		DE_Mouse,
+		DE_KeyboardExtended,
 	};
 
 	enum class EChromaSDKDeviceEnum
@@ -54,6 +55,7 @@ namespace ChromaSDK
 		DE_Keypad,
 		DE_Mouse,
 		DE_Mousepad,
+		DE_KeyboardExtended,
 		DE_MAX,
 	};
 
@@ -278,9 +280,10 @@ namespace ChromaSDK
 			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Keypad] = 0;
 			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Mouse] = 0;
 			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_Mousepad] = 0;
+			_mFrameIndex[(int)EChromaSDKDeviceEnum::DE_KeyboardExtended] = 0;
 		}
 		// Index corresponds to EChromaSDKDeviceEnum;
-		int _mFrameIndex[6];
+		int _mFrameIndex[(int)EChromaSDKDeviceEnum::DE_MAX];
 	};
 
 	enum class EChromaSDKSceneBlend
@@ -320,6 +323,7 @@ namespace ChromaSDK
 	{
 	public:
 		std::vector<FChromaSDKSceneEffect> _mEffects;
+		bool GetState(unsigned int effect);
 		void ToggleState(unsigned int effect);
 	};
 }

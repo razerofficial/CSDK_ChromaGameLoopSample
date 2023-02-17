@@ -2,3 +2,5 @@
 Debug/
 x64/
 Release/
+Debug_NoSignatureCheck/
+Release_NoSignatureCheck/

@@ -47,7 +47,13 @@ The `Chroma Game Loop Sample App` is a C++ sample project that dynamically sets 
 
 **Screenshot:**
 
-![image_2](/images/image_2.png)
+**Console App**
+
+![image_2](images/image_2.png)
+
+**Chroma RGB**
+
+![image_3](images/image_3.png)
 
 ---
 
@@ -9213,6 +9219,7 @@ double result = ChromaAnimationAPI::SubtractThresholdColorsMinMaxRGBNameD(
 **PluginTrimEndFrames**
 
 Trim the end of the animation. The length of the animation will be the lastFrameId
+
 * 1. Reference the animation by id.
 
 ```C++
@@ -9230,6 +9237,7 @@ ChromaAnimationAPI::TrimEndFrames(
 **PluginTrimEndFramesName**
 
 Trim the end of the animation. The length of the animation will be the lastFrameId
+
 * 1. Reference the animation by name.
 
 ```C++

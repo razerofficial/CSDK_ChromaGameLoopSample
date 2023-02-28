@@ -436,8 +436,7 @@ void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 	{
 		//cout << animationName << ": " << (1 + frameId) << " of " << frameCount << endl;
 		float duration;
-		int animationId = ChromaAnimationAPI::GetAnimation(animationName);
-		ChromaAnimationAPI::GetFrame(animationId, frameId, &duration, tempColors, size, 0, 0);
+		ChromaAnimationAPI::GetFrameName(animationName, frameId, &duration, tempColors, size, 0, 0);
 		for (int i = 0; i < size; ++i)
 		{
 			int color1 = colors[i]; //target
@@ -520,8 +519,7 @@ void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 	{
 		//cout << animationName << ": " << (1 + frameId) << " of " << frameCount << endl;
 		float duration;
-		int animationId = ChromaAnimationAPI::GetAnimation(animationName);
-		ChromaAnimationAPI::GetFrame(animationId, frameId, &duration, tempColors, size, 0, 0);
+		ChromaAnimationAPI::GetFrameName(animationName, frameId, &duration, tempColors, size, 0, 0);
 		for (int i = 0; i < size; ++i)
 		{
 			int color1 = colors[i]; //target

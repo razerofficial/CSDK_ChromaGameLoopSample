@@ -426,7 +426,7 @@ int Thresh(int color1, int color2, int inputColor) {
 }
 
 
-void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice1DEnum device1d, const char* animationName,
+void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice1DEnum device1d, const wchar_t* animationName,
 	int* colors, int* tempColors)
 {
 	const int size = GetColorArraySize1D(device1d);
@@ -503,13 +503,13 @@ void BlendAnimation1D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 
 void BlendAnimation1D(const FChromaSDKSceneEffect& effect,
 	FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice1DEnum device1d,
-	const char* animationName,
+	const wchar_t* animationName,
 	vector<int>& colors, vector<int>& tempColors)
 {
 	BlendAnimation1D(effect, deviceFrameIndex, device, device1d, animationName, &colors[0], &tempColors[0]);
 }
 
-void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D, const char* animationName,
+void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D, const wchar_t* animationName,
 	int* colors, int* tempColors)
 {
 	const int size = GetColorArraySize2D(device2D);
@@ -586,7 +586,7 @@ void BlendAnimation2D(const FChromaSDKSceneEffect& effect, FChromaSDKDeviceFrame
 
 void BlendAnimation2D(const FChromaSDKSceneEffect& effect,
 	FChromaSDKDeviceFrameIndex& deviceFrameIndex, int device, EChromaSDKDevice2DEnum device2D,
-	const char* animationName,
+	const wchar_t* animationName,
 	vector<int>& colors, vector<int>& tempColors)
 {
 	BlendAnimation2D(effect, deviceFrameIndex, device, device2D, animationName, &colors[0], &tempColors[0]);
@@ -613,36 +613,36 @@ void BlendAnimations(FChromaSDKScene& scene,
 			//iterate all device types
 			for (int d = (int)EChromaSDKDeviceEnum::DE_ChromaLink; d < (int)EChromaSDKDeviceEnum::DE_MAX; ++d)
 			{
-				string animationName = effect._mAnimation;
+				wstring animationName = effect._mAnimation;
 
 				switch ((EChromaSDKDeviceEnum)d)
 				{
 				case EChromaSDKDeviceEnum::DE_ChromaLink:
-					animationName += "_ChromaLink.chroma";
+					animationName += L"_ChromaLink.chroma";
 					BlendAnimation1D(effect, deviceFrameIndex, d, EChromaSDKDevice1DEnum::DE_ChromaLink, animationName.c_str(), colorsChromaLink, tempColorsChromaLink);
 					break;
 				case EChromaSDKDeviceEnum::DE_Headset:
-					animationName += "_Headset.chroma";
+					animationName += L"_Headset.chroma";
 					BlendAnimation1D(effect, deviceFrameIndex, d, EChromaSDKDevice1DEnum::DE_Headset, animationName.c_str(), colorsHeadset, tempColorsHeadset);
 					break;
 				case EChromaSDKDeviceEnum::DE_Keyboard:
-					animationName += "_Keyboard.chroma";
+					animationName += L"_Keyboard.chroma";
 					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_Keyboard, animationName.c_str(), colorsKeyboard, tempColorsKeyboard);
 					break;
 				case EChromaSDKDeviceEnum::DE_KeyboardExtended:
-					animationName += "_KeyboardExtended.chroma";
+					animationName += L"_KeyboardExtended.chroma";
 					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_KeyboardExtended, animationName.c_str(), colorsKeyboardExtended, tempColorsKeyboardExtended);
 					break;
 				case EChromaSDKDeviceEnum::DE_Keypad:
-					animationName += "_Keypad.chroma";
+					animationName += L"_Keypad.chroma";
 					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_Keypad, animationName.c_str(), colorsKeypad, tempColorsKeypad);
 					break;
 				case EChromaSDKDeviceEnum::DE_Mouse:
-					animationName += "_Mouse.chroma";
+					animationName += L"_Mouse.chroma";
 					BlendAnimation2D(effect, deviceFrameIndex, d, EChromaSDKDevice2DEnum::DE_Mouse, animationName.c_str(), colorsMouse, tempColorsMouse);
 					break;
 				case EChromaSDKDeviceEnum::DE_Mousepad:
-					animationName += "_Mousepad.chroma";
+					animationName += L"_Mousepad.chroma";
 					BlendAnimation1D(effect, deviceFrameIndex, d, EChromaSDKDevice1DEnum::DE_Mousepad, animationName.c_str(), colorsMousepad, tempColorsMousepad);
 					break;
 				}
@@ -1179,8 +1179,6 @@ int main()
 	//wprintf(L"Current Path: %s\r\n\r\n", wpath.c_str());
 	//Sleep(3000);
 
-	string cpath(wpath.begin(), wpath.end());
-
 	// setup scene
 	_sScene = FChromaSDKScene();
 
@@ -1189,7 +1187,7 @@ int main()
 	const int SPEED_MULTIPLIER = 3;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = cpath + "\\Animations\\Gradient1";
+	effect._mAnimation = wpath + L"\\Animations\\Gradient1";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = true;
@@ -1198,7 +1196,7 @@ int main()
 	_sIndexGradient1 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = cpath + "\\Animations\\Gradient2";
+	effect._mAnimation = wpath + L"\\Animations\\Gradient2";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
@@ -1207,7 +1205,7 @@ int main()
 	_sIndexGradient2 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = cpath + "\\Animations\\Gradient3";
+	effect._mAnimation = wpath + L"\\Animations\\Gradient3";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
@@ -1216,7 +1214,7 @@ int main()
 	_sIndexGradient3 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = cpath + "\\Animations\\Gradient4";
+	effect._mAnimation = wpath + L"\\Animations\\Gradient4";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;

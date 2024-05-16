@@ -191,6 +191,10 @@ void Init()
 		ChromaAnimationAPI::UninitAPI();
 		exit(1);
 	}
+
+	// Manually set event names
+	ChromaAnimationAPI::UseForwardChromaEvents(false);
+
 	Sleep(100); //wait for init
 }
 
@@ -1098,45 +1102,118 @@ void InputHandler()
 		{
 			inputDetected = true;
 			_sAmmo = !_sAmmo;
+
+			// Trigger haptic effect
+			if (_sAmmo)
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Ammo_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Ammo_OFF");
+			}
 		}
 		if (inputE.WasReleased(true))
 		{
 			inputDetected = true;
 			_sExtended = !_sExtended;
+
+			// Trigger haptic effect
+			if (_sExtended)
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"ExtendedKeyboard_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"ExtendedKeyboard_OFF");
+			}
 		}
 		if (inputH.WasReleased(true))
 		{
 			inputDetected = true;
 			_sHotkeys = !_sHotkeys;
+
+			// Trigger haptic effect
+			if (_sHotkeys)
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Hotkeys_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Hotkeys_OFF");
+			}
 		}
 		if (inputC.WasReleased(true))
 		{
 			inputDetected = true;
 			_sAmbientColor = ChromaAnimationAPI::GetRGB(rand() % 256, rand() % 256, rand() % 256);
+
+			// Trigger haptic effect
+			ChromaAnimationAPI::CoreSetEventName(L"Color_Random");
 		}
 		if (input1.WasReleased(true))
 		{
 			inputDetected = true;
 			_sScene.ToggleState(_sIndexGradient1);
 			_sAmbientColor = 0;
+
+			// Trigger haptic effect
+			if (_sScene.GetState(_sIndexGradient1))
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient1_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient1_OFF");
+			}
 		}
 		if (input2.WasReleased(true))
 		{
 			inputDetected = true;
 			_sScene.ToggleState(_sIndexGradient2);
 			_sAmbientColor = 0;
+
+			// Trigger haptic effect
+			if (_sScene.GetState(_sIndexGradient2))
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient2_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient2_OFF");
+			}
 		}
 		if (input3.WasReleased(true))
 		{
 			inputDetected = true;
 			_sScene.ToggleState(_sIndexGradient3);
 			_sAmbientColor = 0;
+
+			// Trigger haptic effect
+			if (_sScene.GetState(_sIndexGradient3))
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient3_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient3_OFF");
+			}
 		}
 		if (input4.WasReleased(true))
 		{
 			inputDetected = true;
 			_sScene.ToggleState(_sIndexGradient4);
 			_sAmbientColor = 0;
+
+			// Trigger haptic effect
+			if (_sScene.GetState(_sIndexGradient4))
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient4_ON");
+			}
+			else
+			{
+				ChromaAnimationAPI::CoreSetEventName(L"Gradient4_OFF");
+			}
 		}
 
 		Sleep(1);

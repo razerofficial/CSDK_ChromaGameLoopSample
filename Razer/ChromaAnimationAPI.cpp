@@ -6,9 +6,9 @@
 
 
 # ifdef _WIN64
-#define CHROMA_EDITOR_DLL	L"CChromaEditorLibrary64.dll"
+#define CHROMA_EDITOR_DLL	"CChromaEditorLibrary64.dll"
 #else
-#define CHROMA_EDITOR_DLL	L"CChromaEditorLibrary.dll"
+#define CHROMA_EDITOR_DLL	"CChromaEditorLibrary.dll"
 #endif
 
 
@@ -143,8 +143,11 @@ CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_CREATE_MOUSEPAD_EFFECT, CoreCreateMous
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_DELETE_EFFECT, CoreDeleteEffect);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_INIT, CoreInit);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_INIT_SDK, CoreInitSDK);
+CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_IS_ACTIVE, CoreIsActive);
+CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_IS_CONNECTED, CoreIsConnected);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_QUERY_DEVICE, CoreQueryDevice);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_SET_EFFECT, CoreSetEffect);
+CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_SET_EVENT_NAME, CoreSetEventName);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_STREAM_BROADCAST, CoreStreamBroadcast);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_STREAM_BROADCAST_END, CoreStreamBroadcastEnd);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_CORE_STREAM_GET_AUTH_SHORTCODE, CoreStreamGetAuthShortcode);
@@ -561,6 +564,7 @@ CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_UNLOAD_LIBRARY_SDK, UnloadLibrarySDK);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_UNLOAD_LIBRARY_STREAMING_PLUGIN, UnloadLibraryStreamingPlugin);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_UPDATE_FRAME, UpdateFrame);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_UPDATE_FRAME_NAME, UpdateFrameName);
+CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_USE_FORWARD_CHROMA_EVENTS, UseForwardChromaEvents);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_USE_IDLE_ANIMATION, UseIdleAnimation);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_USE_IDLE_ANIMATIONS, UseIdleAnimations);
 CHROMASDK_DECLARE_METHOD_IMPL(PLUGIN_USE_PRELOADING, UsePreloading);
@@ -587,27 +591,32 @@ int ChromaAnimationAPI::InitAPI()
 		return 0;
 	}
 
-	wchar_t filename[MAX_PATH]; //this is a char buffer
-	GetModuleFileNameW(NULL, filename, sizeof(filename));
+	wchar_t wFileName[MAX_PATH]; //this is a char buffer
+	GetModuleFileNameW(NULL, wFileName, sizeof(wFileName));
 
-	std::wstring path;
-	const size_t last_slash_idx = std::wstring(filename).rfind('\\');
+	// Convert the wide character path to a narrow character (ANSI) string
+	char filename[MAX_PATH];
+	WideCharToMultiByte(CP_UTF8, 0, wFileName, -1, filename, MAX_PATH, NULL, NULL);
+
+	std::string path;
+	const size_t last_slash_idx = std::string(filename).rfind('\\');
 	if (std::string::npos != last_slash_idx)
 	{
-		path = std::wstring(filename).substr(0, last_slash_idx);
+		path = std::string(filename).substr(0, last_slash_idx);
 	}
 
-	path += L"\\";
+	path += "\\";
 	path += CHROMA_EDITOR_DLL;
 
 	// check the library file version
-	if (!VerifyLibrarySignature::IsFileVersionSameOrNewer(path.c_str(), 1, 0, 0, 10))
+	if (!VerifyLibrarySignature::IsFileVersionSameOrNewer(path.c_str(), 1, 0, 1, 1))
 	{
 		ChromaLogger::fprintf(stderr, "Detected old version of Chroma Editor Library!\r\n");
 		return RZRESULT_DLL_NOT_FOUND;
 	}
 
 #ifdef CHECK_CHROMA_LIBRARY_SIGNATURE
+	// verify the library has a valid signature
 	_sInvalidSignature = !VerifyLibrarySignature::VerifyModule(path);
 #endif
 
@@ -617,7 +626,12 @@ int ChromaAnimationAPI::InitAPI()
 		return RZRESULT_DLL_INVALID_SIGNATURE;
 	}
 
-	HMODULE library = LoadLibrary(path.c_str());
+	const char* fullPath = path.c_str();
+	wchar_t wFullPath[MAX_PATH];
+	int wideStrLength = MultiByteToWideChar(CP_UTF8, 0, fullPath, -1, NULL, 0);
+	MultiByteToWideChar(CP_UTF8, 0, fullPath, -1, wFullPath, wideStrLength);
+
+	HMODULE library = LoadLibraryW(wFullPath);
 	if (library == NULL)
 	{ 
 		ChromaLogger::fprintf(stderr, "Failed to load Chroma Editor Library!\r\n");
@@ -750,8 +764,11 @@ CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_CREATE_MOUSEPAD_EFFECT, CoreCreateMousepad
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_DELETE_EFFECT, CoreDeleteEffect);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_INIT, CoreInit);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_INIT_SDK, CoreInitSDK);
+CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_IS_ACTIVE, CoreIsActive);
+CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_IS_CONNECTED, CoreIsConnected);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_QUERY_DEVICE, CoreQueryDevice);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_SET_EFFECT, CoreSetEffect);
+CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_SET_EVENT_NAME, CoreSetEventName);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_STREAM_BROADCAST, CoreStreamBroadcast);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_STREAM_BROADCAST_END, CoreStreamBroadcastEnd);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_CORE_STREAM_GET_AUTH_SHORTCODE, CoreStreamGetAuthShortcode);
@@ -1168,6 +1185,7 @@ CHROMASDK_VALIDATE_METHOD(PLUGIN_UNLOAD_LIBRARY_SDK, UnloadLibrarySDK);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_UNLOAD_LIBRARY_STREAMING_PLUGIN, UnloadLibraryStreamingPlugin);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_UPDATE_FRAME, UpdateFrame);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_UPDATE_FRAME_NAME, UpdateFrameName);
+CHROMASDK_VALIDATE_METHOD(PLUGIN_USE_FORWARD_CHROMA_EVENTS, UseForwardChromaEvents);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_USE_IDLE_ANIMATION, UseIdleAnimation);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_USE_IDLE_ANIMATIONS, UseIdleAnimations);
 CHROMASDK_VALIDATE_METHOD(PLUGIN_USE_PRELOADING, UsePreloading);
@@ -1328,8 +1346,11 @@ int ChromaAnimationAPI::UninitAPI()
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreDeleteEffect);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreInit);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreInitSDK);
+	CHROMASDK_DECLARE_METHOD_CLEAR(CoreIsActive);
+	CHROMASDK_DECLARE_METHOD_CLEAR(CoreIsConnected);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreQueryDevice);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreSetEffect);
+	CHROMASDK_DECLARE_METHOD_CLEAR(CoreSetEventName);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreStreamBroadcast);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreStreamBroadcastEnd);
 	CHROMASDK_DECLARE_METHOD_CLEAR(CoreStreamGetAuthShortcode);
@@ -1746,6 +1767,7 @@ int ChromaAnimationAPI::UninitAPI()
 	CHROMASDK_DECLARE_METHOD_CLEAR(UnloadLibraryStreamingPlugin);
 	CHROMASDK_DECLARE_METHOD_CLEAR(UpdateFrame);
 	CHROMASDK_DECLARE_METHOD_CLEAR(UpdateFrameName);
+	CHROMASDK_DECLARE_METHOD_CLEAR(UseForwardChromaEvents);
 	CHROMASDK_DECLARE_METHOD_CLEAR(UseIdleAnimation);
 	CHROMASDK_DECLARE_METHOD_CLEAR(UseIdleAnimations);
 	CHROMASDK_DECLARE_METHOD_CLEAR(UsePreloading);

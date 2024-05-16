@@ -70,7 +70,7 @@ The `Chroma Game Loop Sample App` is a C++ sample project that dynamically sets 
 
 **Chroma RGB**
 
-![image_8](images/image_8.png)
+![image_3](images/image_3.png)
 
 ---
 
@@ -91,7 +91,7 @@ The sample apps use the `CHECK_CHROMA_LIBRARY_SIGNATURE` preprocessor definition
 
 The project has `NoSignatureCheck` configurations to debug with unsigned builds for testing feature updates. The `NoSignatureCheck` configurations do not set the `CHECK_CHROMA_LIBRARY_SIGNATURE` preprocessor definition.
 
-![image_9](images/image_9.png)
+![image_4](images/image_4.png)
 
 <a name="chroma-editor-library"></a>
 

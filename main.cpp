@@ -99,6 +99,7 @@ void PrintLegend(bool supportsStreaming, BYTE platform)
 	cout << "Press `3` for gradient 3 [" << (_sScene.GetState(_sIndexGradient3) ? "ON" : "OFF") << "]" << endl;
 	cout << "Press `4` for gradient 4 [" << (_sScene.GetState(_sIndexGradient4) ? "ON" : "OFF") << "]" << endl;
 	cout << "Press `C` to change base color." << endl;
+	cout << "Press `S` to stop haptics." << endl;
 	
 	short cpuUsage = _gUsage.GetUsage();
 	cout << "CPU usage: " << cpuUsage << "%" << endl;
@@ -997,6 +998,7 @@ void InputHandler()
 	HandleInput input3 = HandleInput('3');
 	HandleInput input4 = HandleInput('4');
 	HandleInput inputPlatform = HandleInput('P');
+	HandleInput inputS = HandleInput('S');
 
 	bool inputDetected = true;
 
@@ -1103,13 +1105,14 @@ void InputHandler()
 			inputDetected = true;
 			_sAmmo = !_sAmmo;
 
-			// Trigger haptic effect
 			if (_sAmmo)
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Ammo_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Ammo_OFF");
 			}
 		}
@@ -1118,13 +1121,14 @@ void InputHandler()
 			inputDetected = true;
 			_sExtended = !_sExtended;
 
-			// Trigger haptic effect
 			if (_sExtended)
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"ExtendedKeyboard_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"ExtendedKeyboard_OFF");
 			}
 		}
@@ -1133,13 +1137,14 @@ void InputHandler()
 			inputDetected = true;
 			_sHotkeys = !_sHotkeys;
 
-			// Trigger haptic effect
 			if (_sHotkeys)
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Hotkeys_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Hotkeys_OFF");
 			}
 		}
@@ -1148,8 +1153,8 @@ void InputHandler()
 			inputDetected = true;
 			_sAmbientColor = ChromaAnimationAPI::GetRGB(rand() % 256, rand() % 256, rand() % 256);
 
-			// Trigger haptic effect
-			ChromaAnimationAPI::CoreSetEventName(L"Color_Random");
+			// Merge haptic effect
+			ChromaAnimationAPI::CoreSetEventName(L"ColorRandom_MERGE");
 		}
 		if (input1.WasReleased(true))
 		{
@@ -1157,13 +1162,14 @@ void InputHandler()
 			_sScene.ToggleState(_sIndexGradient1);
 			_sAmbientColor = 0;
 
-			// Trigger haptic effect
 			if (_sScene.GetState(_sIndexGradient1))
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient1_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient1_OFF");
 			}
 		}
@@ -1173,13 +1179,14 @@ void InputHandler()
 			_sScene.ToggleState(_sIndexGradient2);
 			_sAmbientColor = 0;
 
-			// Trigger haptic effect
 			if (_sScene.GetState(_sIndexGradient2))
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient2_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient2_OFF");
 			}
 		}
@@ -1189,13 +1196,14 @@ void InputHandler()
 			_sScene.ToggleState(_sIndexGradient3);
 			_sAmbientColor = 0;
 
-			// Trigger haptic effect
 			if (_sScene.GetState(_sIndexGradient3))
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient3_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient3_OFF");
 			}
 		}
@@ -1205,15 +1213,22 @@ void InputHandler()
 			_sScene.ToggleState(_sIndexGradient4);
 			_sAmbientColor = 0;
 
-			// Trigger haptic effect
 			if (_sScene.GetState(_sIndexGradient4))
 			{
+				// Loop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient4_ON");
 			}
 			else
 			{
+				// Stop haptic effect
 				ChromaAnimationAPI::CoreSetEventName(L"Gradient4_OFF");
 			}
+		}
+
+		if (inputS.WasReleased(true))
+		{
+			// Stop all haptics
+			ChromaAnimationAPI::CoreSetEventName(L"");
 		}
 
 		Sleep(1);

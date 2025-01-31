@@ -27,13 +27,13 @@ const float MATH_PI = 3.14159f;
 
 // This final animation will have a single frame
 // Any color changes will immediately display in the next frame update.
-const char* ANIMATION_FINAL_CHROMA_LINK = "Dynamic\\Final_ChromaLink.chroma";
-const char* ANIMATION_FINAL_HEADSET = "Dynamic\\Final_Headset.chroma";
-const char* ANIMATION_FINAL_KEYBOARD = "Dynamic\\Final_Keyboard.chroma";
-const char* ANIMATION_FINAL_KEYBOARD_EXTENDED = "Dynamic\\Final_KeyboardExtended.chroma";
-const char* ANIMATION_FINAL_KEYPAD = "Dynamic\\Final_Keypad.chroma";
-const char* ANIMATION_FINAL_MOUSE = "Dynamic\\Final_Mouse.chroma";
-const char* ANIMATION_FINAL_MOUSEPAD = "Dynamic\\Final_Mousepad.chroma";
+const wchar_t* ANIMATION_FINAL_CHROMA_LINK = L"Dynamic\\Final_ChromaLink.chroma";
+const wchar_t* ANIMATION_FINAL_HEADSET = L"Dynamic\\Final_Headset.chroma";
+const wchar_t* ANIMATION_FINAL_KEYBOARD = L"Dynamic\\Final_Keyboard.chroma";
+const wchar_t* ANIMATION_FINAL_KEYBOARD_EXTENDED = L"Dynamic\\Final_KeyboardExtended.chroma";
+const wchar_t* ANIMATION_FINAL_KEYPAD = L"Dynamic\\Final_Keypad.chroma";
+const wchar_t* ANIMATION_FINAL_MOUSE = L"Dynamic\\Final_Mouse.chroma";
+const wchar_t* ANIMATION_FINAL_MOUSEPAD = L"Dynamic\\Final_Mousepad.chroma";
 
 #endif
 
@@ -242,7 +242,7 @@ const int GetColorArraySize2D(EChromaSDKDevice2DEnum device)
 
 #if !USE_ARRAY_EFFECTS
 
-void SetupAnimation1D(const char* path, EChromaSDKDevice1DEnum device)
+void SetupAnimation1D(const wchar_t* path, EChromaSDKDevice1DEnum device)
 {
 	int animationId = ChromaAnimationAPI::GetAnimation(path);
 	if (animationId == -1)
@@ -254,7 +254,7 @@ void SetupAnimation1D(const char* path, EChromaSDKDevice1DEnum device)
 	}
 }
 
-void SetupAnimation2D(const char* path, EChromaSDKDevice2DEnum device)
+void SetupAnimation2D(const wchar_t* path, EChromaSDKDevice2DEnum device)
 {
 	int animationId = ChromaAnimationAPI::GetAnimation(path);
 	if (animationId == -1)

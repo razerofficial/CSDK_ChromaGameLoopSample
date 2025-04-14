@@ -160,12 +160,6 @@ void PrintLegend(bool supportsStreaming, BYTE platform)
 
 void Init()
 {
-	if (ChromaAnimationAPI::InitAPI() != 0)
-	{
-		cerr << "Failed to load Chroma library!" << endl;
-		exit(1);
-	}
-
 	ChromaSDK::APPINFOTYPE appInfo = {};
 
 	_tcscpy_s(appInfo.Title, 256, _T("Razer Chroma CSDK Game Loop Sample Application"));
@@ -1237,19 +1231,14 @@ void InputHandler()
 
 void Cleanup()
 {
-	if (ChromaAnimationAPI::GetIsInitializedAPI())
+	if (ChromaAnimationAPI::IsInitialized())
 	{
-		if (ChromaAnimationAPI::IsInitialized())
+		RZRESULT result = ChromaAnimationAPI::Uninit();
+		ChromaAnimationAPI::UninitAPI();
+		if (result != RZRESULT_SUCCESS)
 		{
-			ChromaAnimationAPI::StopAll();
-			ChromaAnimationAPI::CloseAll();
-			RZRESULT result = ChromaAnimationAPI::Uninit();
-			ChromaAnimationAPI::UninitAPI();
-			if (result != RZRESULT_SUCCESS)
-			{
-				cerr << "Failed to uninitialize Chroma!" << endl;
-				exit(1);
-			}
+			cerr << "Failed to uninitialize Chroma!" << endl;
+			exit(1);
 		}
 	}
 }
@@ -1257,19 +1246,6 @@ void Cleanup()
 int main()
 {
 	fprintf(stdout, "C++ CHROMA GAME LOOP SAMPLE APP\r\n\r\n");
-
-	wchar_t filename[MAX_PATH]; //this is a char buffer
-	GetModuleFileNameW(NULL, filename, sizeof(filename));
-
-	std::wstring wpath;
-	const size_t last_slash_idx = std::wstring(filename).rfind('\\');
-	if (std::string::npos != last_slash_idx)
-	{
-		wpath = std::wstring(filename).substr(0, last_slash_idx);
-	}
-
-	//wprintf(L"Current Path: %s\r\n\r\n", wpath.c_str());
-	//Sleep(3000);
 
 	// setup scene
 	_sScene = FChromaSDKScene();
@@ -1279,7 +1255,7 @@ int main()
 	const int SPEED_MULTIPLIER = 3;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = wpath + L"\\Animations\\Gradient1";
+	effect._mAnimation = L"Animations\\Gradient1";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = true;
@@ -1288,7 +1264,7 @@ int main()
 	_sIndexGradient1 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = wpath + L"\\Animations\\Gradient2";
+	effect._mAnimation = L"Animations\\Gradient2";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
@@ -1297,7 +1273,7 @@ int main()
 	_sIndexGradient2 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = wpath + L"\\Animations\\Gradient3";
+	effect._mAnimation = L"Animations\\Gradient3";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;
@@ -1306,7 +1282,7 @@ int main()
 	_sIndexGradient3 = (int)_sScene._mEffects.size() - 1;
 
 	effect = FChromaSDKSceneEffect();
-	effect._mAnimation = wpath + L"\\Animations\\Gradient4";
+	effect._mAnimation = L"Animations\\Gradient4";
 	effect._mSpeed = SPEED_MULTIPLIER;
 	effect._mBlend = EChromaSDKSceneBlend::SB_None;
 	effect._mState = false;

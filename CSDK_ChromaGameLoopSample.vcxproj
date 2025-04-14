@@ -163,10 +163,8 @@
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoSignatureCheck|Win32'">
@@ -183,10 +181,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -207,10 +203,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoSignatureCheck|Win32'">
@@ -231,10 +225,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -251,10 +243,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoSignatureCheck|x64'">
@@ -271,10 +261,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -295,10 +283,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NoSignatureCheck|x64'">
@@ -319,10 +305,8 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>COPY /Y *.DLL "$(OutDir)"
-COPY /Y *.PDB "$(OutDir)"
-IF NOT EXIST "$(OutDir)\Animations" MKDIR "$(OutDir)\Animations"
-COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -332,6 +316,7 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
     <ClCompile Include="Razer\ChromaAnimationAPI.cpp" />
     <ClCompile Include="Razer\ChromaLogger.cpp" />
     <ClCompile Include="Razer\ChromaSDKPluginTypes.cpp" />
+    <ClCompile Include="Razer\UnicodeChromaAnimationAPI.cpp" />
     <ClCompile Include="Razer\VerifyLibrarySignature.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +328,7 @@ COPY /Y  "Animations\*.CHROMA" "$(OutDir)\Animations"</Command>
     <ClInclude Include="Razer\RzChromaSDKDefines.h" />
     <ClInclude Include="Razer\RzChromaSDKTypes.h" />
     <ClInclude Include="Razer\RzErrors.h" />
+    <ClInclude Include="Razer\UnicodeChromaAnimationAPI.h" />
     <ClInclude Include="Razer\VerifyLibrarySignature.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
